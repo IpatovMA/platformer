@@ -13,11 +13,76 @@ local physics = require("physics")
 physics.start()
 
 --system.activate( "multitouch" )
-
+--построение карты
 local fileName = 'map.txt'
 local filePath = system.pathForFile(fileName)
-local map_data = io.open(filePath, "r")
+local file = io.open(filePath, "r")
 
+local block_size=50
+local map_width = 80
+local map_heigth = 10
+
+local x = 1
+local y = display.contentCenterY/1.5
+local map = {}
+local block_count = 1
+
+ for  i=1,map_heigth do
+  map[i]={}
+  local line = file:read("*l")
+  for j=1,map_width do
+      map[i][j]=string.match(line, "%a", j)
+    --  print(map[i][j])
+  --   if B=="B" then
+  --     --print("B")
+  --       =display.newRect(j*block_size+x,i*block_size+y,block_size,block_size),
+  --
+  --
+  --     map[i][j]:setFillColor(math.random(),math.random(),math.random())
+  --     physics.addBody(map[i][j],"static",{bounce = 0,friction = 1.0})
+  --     camera:add(map[i][j],2)
+  --   end
+  --   if B=="G" then
+  --     --print("G")
+  --     map[i][j] = {
+  --       rect=display.newRect(j*block_size+x,i*block_size+y,block_size,block_size),
+  --       id = "block"}
+  --
+      -- map[i][j].rect:setFillColor(1,0,0)
+      -- physics.addBody(map[i][j].rect,"static",{bounce = 0,friction = 1.0})
+      -- camera:add(map[i][j].rect,2)
+  --   end
+  --   x=x+block_size
+  --   end
+  -- i=i+1
+end
+end
+io.close( file )
+
+for i=1,map_heigth do
+  for j=1,map_width do
+    if map[i][j] == "B" then
+      map[i][j] = {
+        rect=display.newRect(j*block_size+x,i*block_size+y,block_size,block_size),
+        id = "block"
+      }
+      map[i][j].rect:setFillColor(math.random(),math.random(),math.random())
+      physics.addBody(map[i][j].rect,"static",{bounce = 0,friction = 1.0})
+      camera:add(map[i][j].rect,2)
+    end
+    if map[i][j] == "G" then
+      map[i][j] = {
+        rect=display.newRect(j*block_size+x,i*block_size+y,block_size,block_size),
+        id = "block"
+      }
+      map[i][j].rect:setFillColor(0,1,0)
+      physics.addBody(map[i][j].rect,"static",{bounce = 0,friction = 1.0})
+      camera:add(map[i][j].rect,2)
+    end
+  end
+end
+
+--пресонаж
 local player = display.newRect(0,0,32,64)
 player.x = 100
 player.y = display.contentCenterY*1.5
@@ -26,15 +91,9 @@ camera:add(player, 1)
 physics.addBody(player,"dynamic",{density=1.0,bounce = 0,friction = 1.0})
 player.isFixedRotation = true
 
-local block_size=50
 
-local map_width = 0
-local map_heigth = 0
+--[[
 
-local y = display.contentCenterY/1.5
-local block = {}
-local block_count = 1
-local i = 1
 for line in map_data:lines() do
   local x = 0 --смещение от каря уровня
   local b = 0 --подсчет длины уровня
@@ -52,27 +111,36 @@ for line in map_data:lines() do
       b=b+1
       block_count=block_count+1
     end
+    if B=="G" then
+      block[block_count] = {
+        rect=display.newRect(j*block_size+x,i*block_size+y,block_size,block_size),
+        id = "block"}
+
+      block[block_count].rect:setFillColor(math.random(),math.random(),math.random())
+      physics.addBody(block[block_count].rect,"static",{bounce = 0,friction = 1.0})
+      camera:add(block[block_count].rect,2)
+      b=b+1
+      block_count=block_count+1
+    end
 map_width = math.max(map_width,b) --подсчет длины уровня
   end
   i=i+1
 end
-io.close( map_data )
+
+
+]]
+
 --block[1].rect:setFillColor(0.5)
 
 --print(block_count)
 
-map_heigth=i*block_size
+map_heigth=map_heigth*block_size
 map_width=map_width*block_size
 
 --камера
 camera:setFocus(player)
 camera:track()
 camera:setBounds(display.contentCenterX, map_width - display.contentCenterX, display.contentCenterY, display.contentCenterY)
-
---[[
-
-
-]]
 
 --управение
 local up_flag = false
