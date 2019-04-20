@@ -123,10 +123,10 @@ local i=math.ceil((bott_y(obj)+1)/level.block_size)
   return false
 end
 
-local function onSpikes (obj)
+local function inLava (obj)
 local i=math.ceil((bott_y(obj)+1)/level.block_size)
   for j=(math.ceil((left_x(obj))/level.block_size)),(math.ceil((rigth_x(obj))/level.block_size)) do
-   if level.map[i][j].id=="spike" then
+   if level.map[i][j].id=="lava" then
      return true
    end
   end
@@ -149,7 +149,7 @@ end
 
 --проверка в реальном времени
 local function eventChecker ()
-  if onSpikes(player) then
+  if inLava(player) then
     player_death()
   end
   catchGold(player)

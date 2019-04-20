@@ -55,6 +55,7 @@ function mapbild (level)
     local x = -level.block_size/2
     local y = -level.block_size/2
     local coinScaling = level.block_size/coin_sprite_options.height*0.9
+    local lavaScaling = level.block_size/lava_sprite_options.height
     local map = {}
   for i=1,level.height do
     map[i] = {}
@@ -66,7 +67,7 @@ function mapbild (level)
           id = "air"
         }
         map[i][j].rect.alpha = 0
-        camera:add(map[i][j].rect,1)
+
       end
       --твердые блоки
       if level.mapdata[i][j] == "B" then
@@ -77,7 +78,7 @@ function mapbild (level)
         map[i][j].rect.x=j*level.block_size+x
         map[i][j].rect.y=i*level.block_size+y
         physics.addBody(map[i][j].rect,"static",{bounce = 0,friction = 1.0})
-        camera:add(map[i][j].rect,1)
+
       end
       --голда
       if level.mapdata[i][j] == "G" then
@@ -92,18 +93,25 @@ function mapbild (level)
         map[i][j].rect.x=j*level.block_size+x
         map[i][j].rect.y=i*level.block_size+y
         map[i][j].rect:play()
-        camera:add(map[i][j].rect,1)
+
       end
-      --шипы, чтобы протестить умирание персонажа
-      if level.mapdata[i][j] == "A" then
+      --лава
+      if level.mapdata[i][j] == "L" then
         map[i][j] = {
-          rect=display.newRect(j*level.block_size+x,i*level.block_size+y,level.block_size,level.block_size),
-          id = "spike"
+        --  rect=display.newRect(j*level.block_size+x,i*level.block_size+y,level.block_size,level.block_size),
+          rect  = display.newSprite( lava_sprite_sheet, sequences_lava),
+          id = "lava"
         }
-        map[i][j].rect:setFillColor(1)
+        map[i][j].rect:setSequence("bul'k")
+        map[i][j].rect.yScale = lavaScaling
+        map[i][j].rect.xScale = lavaScaling
+        map[i][j].rect.x=j*level.block_size+x
+        map[i][j].rect.y=i*level.block_size+y
+        map[i][j].rect:play()
         physics.addBody(map[i][j].rect,"static",{bounce = 0,friction = 1.0})
-        camera:add(map[i][j].rect,1)
+
       end
+      camera:add(map[i][j].rect,1)
     end
   end
   return map
