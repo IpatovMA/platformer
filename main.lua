@@ -50,16 +50,16 @@ local player_options = {
 }
 
 local player = display.newRect(player_options.start_x,player_options.start_y,player_options.width,player_options.height)
-player:setFillColor(1,0.8,0)
+player.alpha = 0
 camera:add(player, 1)
 physics.addBody(player,"dynamic",{density=3.0,bounce = 0,friction = 1.0})
 player.isFixedRotation = true
-
+--  --золото счетчик
 local gold = {count = 0}
 gold.show = display.newText(gold.count, display.contentCenterX + display.actualContentWidth/2.2, 20, native.systemFont, 40)
 gold.show:setFillColor(1,1,0)
+--  --спрайт
 local player_sprite = display.newSprite( player_sprite_sheet, sequences_player_run )
-
 player_sprite.yScale = player_options.height/(player_sprite_options.height-3)
 player_sprite.xScale = player_options.height/(player_sprite_options.height-3)
 player_sprite:play()
@@ -123,8 +123,8 @@ end
 Runtime:addEventListener( "enterFrame", eventChecker )
 --смерть персонажа, перезагрузка уровня
 function player_death ()
-  player.x = start_player_position_x
-  player.y = start_player_position_y
+  player.x = player_options.start_x
+  player.y = player_options.start_y
   sec=0
   gold.count=0
   gold.show.text=gold.count
@@ -158,6 +158,7 @@ local function walkplayer (event)
   player:setLinearVelocity(vx/1.3, -jampspeed )
  end
  if (down_flag) then
+   player_death ()
  end
  -- if not(rigth_flag) and not(left_flag) and not(up_flag) then
  --    player:setLinearVelocity(0)
