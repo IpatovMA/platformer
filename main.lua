@@ -19,11 +19,19 @@ local module = require("module")
 -- local background = display.newImageRect( "background.png", display.actualContentWidth, display.actualContentHeight )
 -- background.x = display.contentCenterX
 -- background.y = display.contentCenterY
+
+
 local fileName = 'map.txt'
 local block_size=50
 local map_width = 80
 local map_height = 15
-local map = mapbild (fileName,block_size,map_width,map_height)
+local mapdata = mapread (fileName,map_width,map_height)
+local map = mapbild (mapdata,block_size,map_width,map_height)
+for i=1,map_height do
+  for j=1,map_width do
+       print(mapdata[i][j])
+  end
+end
 
 --таймер
 local sec = 0
@@ -77,18 +85,17 @@ local i=math.ceil((bott_y(obj)+1)/block_size)
 end
 
 local function catchGold (obj)
-for i = math.ceil((top_y(obj)-1)/block_size),math.ceil((bott_y(obj)+1)/block_size) do
-  for j=(math.ceil((left_x(obj)-1)/block_size)),(math.ceil((rigth_x(obj)+1)/block_size)) do
-   if map[i][j].id=="gold" then
-     map[i][j].id="air"
-     --physics.removeBody(map[i][j].rect)
-     map[i][j].rect.alpha = 0
-     gold.count=gold.count+1
-     gold.show.text=gold.count
-
-   end
+  for i = math.ceil((top_y(obj)-1)/block_size),math.ceil((bott_y(obj)+1)/block_size) do
+    for j=(math.ceil((left_x(obj)-1)/block_size)),(math.ceil((rigth_x(obj)+1)/block_size)) do
+     if map[i][j].id=="gold" then
+       map[i][j].id="air"
+       --physics.removeBody(map[i][j].rect)
+       map[i][j].rect.alpha = 0
+       gold.count=gold.count+1
+       gold.show.text=gold.count
+     end
+    end
   end
-end
   return false
 end
 
@@ -100,7 +107,7 @@ local function eventChecker ()
 
   end
 end
-
+--print(mapdata[1][1])
 Runtime:addEventListener( "enterFrame", eventChecker )
 --смерть персонажа, перезагрузка уровня
 function player_death ()
@@ -109,7 +116,8 @@ function player_death ()
   sec=0
   gold.count=0
   gold.show.text=gold.count
-  map=mapConnect (map,rebuildGold(fileName,block_size,map_width,map_height),block_size,map_width,map_height)
+  map = rebuildmap(mapdata,map,map_width,map_height)
+--  map=mapConnect (map,rebuildGold(mapdata,block_size,map_width,map_height),block_size,map_width,map_height)
 end
 
 --управение
