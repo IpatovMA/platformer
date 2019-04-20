@@ -50,11 +50,10 @@ gold.show = display.newText(gold.count, display.contentCenterX + display.actualC
 gold.show:setFillColor(1,1,0)
 
 --камера
-map_height=map_height*block_size
-map_width=map_width*block_size
+
 camera:setFocus(player)
 camera:track()
-camera:setBounds(display.contentCenterX, map_width - display.contentCenterX, display.contentCenterY/2, display.contentCenterY*1.5)
+camera:setBounds(display.contentCenterX, map_width*block_size - display.contentCenterX, display.contentCenterY/2, display.contentCenterY*1.5)
 
 --детекторы касаний
 local function onGround (obj)
@@ -82,10 +81,11 @@ for i = math.ceil((top_y(obj)-1)/block_size),math.ceil((bott_y(obj)+1)/block_siz
   for j=(math.ceil((left_x(obj)-1)/block_size)),(math.ceil((rigth_x(obj)+1)/block_size)) do
    if map[i][j].id=="gold" then
      map[i][j].id="air"
-     physics.removeBody(map[i][j].rect)
+     --physics.removeBody(map[i][j].rect)
      map[i][j].rect.alpha = 0
      gold.count=gold.count+1
      gold.show.text=gold.count
+
    end
   end
 end
@@ -109,6 +109,7 @@ function player_death ()
   sec=0
   gold.count=0
   gold.show.text=gold.count
+  map=mapConnect (map,rebuildGold(fileName,block_size,map_width,map_height),block_size,map_width,map_height)
 end
 
 --управение

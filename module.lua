@@ -78,7 +78,7 @@ function mapbild (fileName,block_size,map_width,map_height)
           id = "gold"
         }
         map[i][j].rect:setFillColor(1,1,0)
-        physics.addBody(map[i][j].rect,"static",{bounce = 0,friction = 1.0})
+        --physics.addBody(map[i][j].rect,"static",{bounce = 0,friction = 1.0})
         camera:add(map[i][j].rect,1)
       end
       --шипы, чтобы протестить умирание персонажа
@@ -94,4 +94,55 @@ function mapbild (fileName,block_size,map_width,map_height)
     end
   end
   return map
+end
+
+function rebuildGold (fileName,block_size,map_width,map_height)
+  local filePath = system.pathForFile(fileName)
+  local file = io.open(filePath, "r")
+
+
+  local x = -block_size/2
+  local y = -block_size/2
+  local map = {}
+
+   for  i=1,map_height do
+    map[i]={}
+    local line = file:read("*l")
+      for j=1,map_width do
+        map[i][j]=string.match(line, "%a", j)
+      end
+  end
+  io.close( file )
+
+  for i=1,map_height do
+    for j=1,map_width do
+      if map[i][j] == "G" then
+        map[i][j] = {
+          rect=display.newRect(j*block_size+x,i*block_size+y,block_size,block_size),
+          id = "gold"
+        }
+        map[i][j].rect:setFillColor(1,1,0)
+    --    physics.addBody(map[i][j].rect,"static",{bounce = 0,friction = 1.0})
+        camera:add(map[i][j].rect,1)
+      end
+    end
+    end
+    return map
+    end
+--связка двух карт в одну, у второй приоритет
+function mapConnect (map1,map2,block_size,map_width,map_height)
+  for i=1,map_height do
+    for j=1,map_width do
+      if map2[i][j].rect then
+        -- if map1[i][j]~=map2[i][j]then
+      --  physics.removeBody(map1[i][j].rect)
+        display.remove(map1[i][j].rect)
+        map1[i][j]=map2[i][j]
+      --  physics.addBody(map1[i][j].rect,"static",{bounce = 0,friction = 1.0})
+        print(i,j)
+      -- end
+    end
+    end
+    end
+    return map1
 end
