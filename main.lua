@@ -19,27 +19,24 @@ local module = require("module")
 -- local background = display.newImageRect( "background.png", display.actualContentWidth, display.actualContentHeight )
 -- background.x = display.contentCenterX
 -- background.y = display.contentCenterY
+local level = {
+  fileName = 'map.txt',
+  block_size=50,
+  width = 80,
+  height = 15,
+}
+print(level.height)
+level.mapdata = mapread (level)
+level.map = mapbild (level)
 
-
-local fileName = 'map.txt'
-local block_size=50
-local map_width = 80
-local map_height = 15
-local mapdata = mapread (fileName,map_width,map_height)
-local map = mapbild (mapdata,block_size,map_width,map_height)
-for i=1,map_height do
-  for j=1,map_width do
-       print(mapdata[i][j])
-  end
-end
 
 --таймер
 local sec = 0
-local level_time = display.newText(sec, display.contentCenterX, 20, native.systemFont, 40 )
- level_time:setFillColor(math.random(),math.random(),math.random())
+level.time = display.newText(sec, display.contentCenterX, 20, native.systemFont, 40 )
+ level.time:setFillColor(math.random(),math.random(),math.random())
 local timer_show = function()
   sec = sec +1
-   level_time.text = sec
+   level.time.text = sec
 end
 timer.performWithDelay( 1000, timer_show ,-1 )
 
@@ -61,13 +58,13 @@ gold.show:setFillColor(1,1,0)
 
 camera:setFocus(player)
 camera:track()
-camera:setBounds(display.contentCenterX, map_width*block_size - display.contentCenterX, display.contentCenterY/2, display.contentCenterY*1.5)
+camera:setBounds(display.contentCenterX, level.width*level.block_size - display.contentCenterX, display.contentCenterY/2, display.contentCenterY*1.5)
 
 --детекторы касаний
 local function onGround (obj)
-local i=math.ceil((bott_y(obj)+1)/block_size)
-  for j=(math.ceil((left_x(obj))/block_size)),(math.ceil((rigth_x(obj))/block_size)) do
-   if map[i][j].id=="block" then
+local i=math.ceil((bott_y(obj)+1)/level.block_size)
+  for j=(math.ceil((left_x(obj))/level.block_size)),(math.ceil((rigth_x(obj))/level.block_size)) do
+   if level.map[i][j].id=="block" then
      return true
    end
   end
@@ -75,9 +72,9 @@ local i=math.ceil((bott_y(obj)+1)/block_size)
 end
 
 local function onSpikes (obj)
-local i=math.ceil((bott_y(obj)+1)/block_size)
-  for j=(math.ceil((left_x(obj))/block_size)),(math.ceil((rigth_x(obj))/block_size)) do
-   if map[i][j].id=="spike" then
+local i=math.ceil((bott_y(obj)+1)/level.block_size)
+  for j=(math.ceil((left_x(obj))/level.block_size)),(math.ceil((rigth_x(obj))/level.block_size)) do
+   if level.map[i][j].id=="spike" then
      return true
    end
   end
@@ -85,12 +82,11 @@ local i=math.ceil((bott_y(obj)+1)/block_size)
 end
 
 local function catchGold (obj)
-  for i = math.ceil((top_y(obj)-1)/block_size),math.ceil((bott_y(obj)+1)/block_size) do
-    for j=(math.ceil((left_x(obj)-1)/block_size)),(math.ceil((rigth_x(obj)+1)/block_size)) do
-     if map[i][j].id=="gold" then
-       map[i][j].id="air"
-       --physics.removeBody(map[i][j].rect)
-       map[i][j].rect.alpha = 0
+  for i = math.ceil((top_y(obj)-1)/level.block_size),math.ceil((bott_y(obj)+1)/level.block_size) do
+    for j=(math.ceil((left_x(obj)-1)/level.block_size)),(math.ceil((rigth_x(obj)+1)/level.block_size)) do
+     if level.map[i][j].id=="gold" then
+       level.map[i][j].id="air"
+       level.map[i][j].rect.alpha = 0
        gold.count=gold.count+1
        gold.show.text=gold.count
      end
@@ -107,7 +103,7 @@ local function eventChecker ()
 
   end
 end
---print(mapdata[1][1])
+
 Runtime:addEventListener( "enterFrame", eventChecker )
 --смерть персонажа, перезагрузка уровня
 function player_death ()
@@ -116,8 +112,8 @@ function player_death ()
   sec=0
   gold.count=0
   gold.show.text=gold.count
-  map = rebuildmap(mapdata,map,map_width,map_height)
---  map=mapConnect (map,rebuildGold(mapdata,block_size,map_width,map_height),block_size,map_width,map_height)
+  level.map = rebuildmap(level)
+
 end
 
 --управение

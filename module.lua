@@ -30,46 +30,47 @@ end
 --     camera:add(x,1)
 --     x:setFillColor(0,0,1)
 -- end
+
 --построение карты
-function mapread (fileName,map_width,map_height)
-  local filePath = system.pathForFile(fileName)
+function mapread (level)
+  local filePath = system.pathForFile(level.fileName)
   local file = io.open(filePath, "r")
   local mapdata = {}
 
-   for  i=1,map_height do
+   for  i=1,level.height do
     mapdata[i]={}
     local line = file:read("*l")
-      for j=1,map_width do
+      for j=1,level.width do
         mapdata[i][j]=string.match(line, "%a", j)
 
       end
   end
 
   io.close( file )
-  print(mapdata[1][1])
+
   return mapdata
 end
-function mapbild (mapdata,block_size,map_width,map_height)
+function mapbild (level)
 
-    local x = -block_size/2
-    local y = -block_size/2
+    local x = -level.block_size/2
+    local y = -level.block_size/2
     local map = {}
-  for i=1,map_height do
+  for i=1,level.height do
     map[i] = {}
-    for j=1,map_width do
+    for j=1,level.width do
       --пустые блоки
-      if mapdata[i][j] == "z" then
+      if level.mapdata[i][j] == "z" then
         map[i][j] = {
-          rect=display.newRect(j*block_size+x,i*block_size+y,block_size,block_size),
+          rect=display.newRect(j*level.block_size+x,i*level.block_size+y,level.block_size,level.block_size),
           id = "air"
         }
         map[i][j].rect.alpha = 0
         camera:add(map[i][j].rect,1)
       end
       --твердые блоки
-      if mapdata[i][j] == "B" then
+      if level.mapdata[i][j] == "B" then
         map[i][j] = {
-          rect=display.newRect(j*block_size+x,i*block_size+y,block_size,block_size),
+          rect=display.newRect(j*level.block_size+x,i*level.block_size+y,level.block_size,level.block_size),
           id = "block"
         }
         map[i][j].rect:setFillColor(0.37, 0.56, 0.58)
@@ -77,19 +78,18 @@ function mapbild (mapdata,block_size,map_width,map_height)
         camera:add(map[i][j].rect,1)
       end
       --голда
-      if mapdata[i][j] == "G" then
+      if level.mapdata[i][j] == "G" then
         map[i][j] = {
-          rect=display.newRect(j*block_size+x,i*block_size+y,block_size,block_size),
+          rect=display.newRect(j*level.block_size+x,i*level.block_size+y,level.block_size,level.block_size),
           id = "gold"
         }
         map[i][j].rect:setFillColor(1,1,0)
-        --physics.addBody(map[i][j].rect,"static",{bounce = 0,friction = 1.0})
         camera:add(map[i][j].rect,1)
       end
       --шипы, чтобы протестить умирание персонажа
-      if mapdata[i][j] == "A" then
+      if level.mapdata[i][j] == "A" then
         map[i][j] = {
-          rect=display.newRect(j*block_size+x,i*block_size+y,block_size,block_size),
+          rect=display.newRect(j*level.block_size+x,i*level.block_size+y,level.block_size,level.block_size),
           id = "spike"
         }
         map[i][j].rect:setFillColor(1)
@@ -101,44 +101,35 @@ function mapbild (mapdata,block_size,map_width,map_height)
   return map
 end
 
-function rebuildmap (mapdata,map,map_width,map_height)
---  local x = -block_size/2
---  local y = -block_size/2
+function rebuildmap (level)
 
+  for i=1,level.height do
 
+    for j=1,level.width do
+      if level.mapdata[i][j] == "G" and level.map[i][j].id ~="gold" then
 
-  for i=1,map_height do
+      level.map[i][j].id = "gold"
+       level.map[i][j].rect.alpha = 1
 
-    for j=1,map_width do
-      if mapdata[i][j] == "G" and map[i][j].id ~="gold" then
-        -- map[i][j] = {
-        --   rect=display.newRect(j*block_size+x,i*block_size+y,block_size,block_size),
-        --   id = "gold"
-        -- }
-      map[i][j].id = "gold"
-       map[i][j].rect.alpha = 1
-    --    map[i][j].rect:setFillColor(1,1,0)
-    --    physics.addBody(map[i][j].rect,"static",{bounce = 0,friction = 1.0})
-    --    camera:add(map[i][j].rect,1)
       end
     end
     end
-    return map
+    return level.map
     end
---связка двух карт в одну, у второй приоритет
-function mapConnect (map1,map2,block_size,map_width,map_height)
-  for i=1,map_height do
-    for j=1,map_width do
-      if map2[i][j].rect then
-        -- if map1[i][j]~=map2[i][j]then
-      --  physics.removeBody(map1[i][j].rect)
-        display.remove(map1[i][j].rect)
-        map1[i][j]=map2[i][j]
-      --  physics.addBody(map1[i][j].rect,"static",{bounce = 0,friction = 1.0})
-        print(i,j)
-      -- end
-    end
-    end
-    end
-    return map1
-end
+-- --связка двух карт в одну, у второй приоритет
+-- function mapConnect (map1,map2,level.block_size,level.width,level.height)
+--   for i=1,level.height do
+--     for j=1,level.width do
+--       if map2[i][j].rect then
+--         -- if map1[i][j]~=map2[i][j]then
+--       --  physics.removeBody(map1[i][j].rect)
+--         display.remove(map1[i][j].rect)
+--         map1[i][j]=map2[i][j]
+--       --  physics.addBody(map1[i][j].rect,"static",{bounce = 0,friction = 1.0})
+--         print(i,j)
+--       -- end
+--     end
+--     end
+--     end
+--     return map1
+-- end
