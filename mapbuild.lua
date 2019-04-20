@@ -54,6 +54,7 @@ function mapbild (level)
 
     local x = -level.block_size/2
     local y = -level.block_size/2
+    local coinScaling = level.block_size/coin_sprite_options.height*0.9
     local map = {}
   for i=1,level.height do
     map[i] = {}
@@ -81,10 +82,16 @@ function mapbild (level)
       --голда
       if level.mapdata[i][j] == "G" then
         map[i][j] = {
-          rect=display.newRect(j*level.block_size+x,i*level.block_size+y,level.block_size,level.block_size),
+          --rect=display.newRect(j*level.block_size+x,i*level.block_size+y,level.block_size,level.block_size),
+          rect  = display.newSprite( coin_sprite_sheet, sequences_coin ),
           id = "gold"
         }
-        map[i][j].rect:setFillColor(1,1,0)
+        map[i][j].rect:setSequence(rotate)
+        map[i][j].rect.yScale = coinScaling
+        map[i][j].rect.xScale = coinScaling
+        map[i][j].rect.x=j*level.block_size+x
+        map[i][j].rect.y=i*level.block_size+y
+        map[i][j].rect:play()
         camera:add(map[i][j].rect,1)
       end
       --шипы, чтобы протестить умирание персонажа

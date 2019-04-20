@@ -62,9 +62,17 @@ camera:add(player, 1)
 physics.addBody(player,"dynamic",{density=3.0,bounce = 0,friction = 1.0})
 player.isFixedRotation = true
 --  --золото счетчик
+
 local gold = {count = 0}
-gold.show = display.newText(gold.count, display.contentCenterX + display.actualContentWidth/2.2, 20, native.systemFont, 40)
+gold.show = display.newText(gold.count, display.contentCenterX + display.actualContentWidth/2.4, 20, native.systemFont, 40)
 gold.show:setFillColor(1,1,0)
+gold.sprite = display.newSprite( coin_sprite_sheet, sequences_coin )
+gold.sprite:setSequence("shine")
+gold.sprite.yScale = 0.13
+gold.sprite.xScale = 0.13
+gold.sprite.x=display.contentCenterX + display.actualContentWidth/2.2
+gold.sprite.y=20
+gold.sprite:play()
 --  --спрайт
 local player_sprite = display.newSprite( player_sprite_sheet, sequences_player )
 local spriteScale = player_options.height/(player_sprite_options.height-3)
