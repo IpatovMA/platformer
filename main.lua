@@ -25,7 +25,7 @@ local level = {
   width = 80,
   height = 15,
 }
-print(level.height)
+
 level.mapdata = mapread (level)
 level.map = mapbild (level)
 
@@ -46,7 +46,9 @@ local player_options = {
   start_x= 100,
   start_y = display.contentCenterY,
   width =32,
-  height = 64
+  height = 64,
+  vx=0,
+  vy=0
 }
 
 local player = display.newRect(player_options.start_x,player_options.start_y,player_options.width,player_options.height)
@@ -59,12 +61,37 @@ local gold = {count = 0}
 gold.show = display.newText(gold.count, display.contentCenterX + display.actualContentWidth/2.2, 20, native.systemFont, 40)
 gold.show:setFillColor(1,1,0)
 --  --спрайт
-local player_sprite = display.newSprite( player_sprite_sheet, sequences_player_run )
-player_sprite.yScale = player_options.height/(player_sprite_options.height-3)
-player_sprite.xScale = player_options.height/(player_sprite_options.height-3)
-player_sprite:play()
+local player_sprite = display.newSprite( player_sprite_sheet, sequences_player )
+local spriteScale = player_options.height/(player_sprite_options.height-3)
+player_sprite.yScale = spriteScale
+player_sprite.xScale = spriteScale
 camera:add(player_sprite, 1)
 
+local function spriteOritentation(player_sprite)
+if player.vx==0  then
+  if player_sprite.sequence ~= "stay" then
+  player_sprite:setSequence("stay")
+    end
+else
+  if player_sprite.sequence ~= "run" then
+  player_sprite:setSequence("run")
+    end
+  end
+  if player.vx > 0  then
+        player_sprite.xScale =spriteScale
+      end
+  if player.vx < 0  then
+        player_sprite.xScale = -spriteScale
+    end
+
+  if onGround(player) then
+        player_sprite:play()
+      else player_sprite:pause() end
+
+--привязка спрайта персонажа
+player_sprite.x=player.x
+player_sprite.y=player.y
+end
 
 --камера
 
@@ -73,7 +100,7 @@ camera:track()
 camera:setBounds(display.contentCenterX, level.width*level.block_size - display.contentCenterX, display.contentCenterY/2, display.contentCenterY*1.5)
 
 --детекторы касаний
-local function onGround (obj)
+function onGround (obj)
 local i=math.ceil((bott_y(obj)+1)/level.block_size)
   for j=(math.ceil((left_x(obj))/level.block_size)),(math.ceil((rigth_x(obj))/level.block_size)) do
    if level.map[i][j].id=="block" then
@@ -107,20 +134,18 @@ local function catchGold (obj)
   return false
 end
 
+--проверка в реальном времени
 local function eventChecker ()
   if onSpikes(player) then
     player_death()
   end
-  if catchGold(player)then
-
-  end
-
---привязка спрайта персонажа
-player_sprite.x=player.x
-player_sprite.y=player.y
+  catchGold(player)
+  player.vx,player.vy = player:getLinearVelocity()
+  spriteOritentation(player_sprite)
 end
 
 Runtime:addEventListener( "enterFrame", eventChecker )
+
 --смерть персонажа, перезагрузка уровня
 function player_death ()
   player.x = player_options.start_x
@@ -141,21 +166,22 @@ local rigth_flag = false
 local walkspeed = 300
 local jampspeed = 350
 
+
 local function walkplayer (event)
-  local vx,vy = player:getLinearVelocity()
+
  if (rigth_flag) then
    if not(onGround(player)) then
-     player:setLinearVelocity(walkspeed/1.3, vy )
-   else player:setLinearVelocity(walkspeed, vy )
+     player:setLinearVelocity(walkspeed/1.3, player.vy )
+   else player:setLinearVelocity(walkspeed, player.vy )
    end
  end
  if (left_flag) then
    if not(onGround(player)) then
-     player:setLinearVelocity(-walkspeed/1.3, vy )
-   else player:setLinearVelocity(-walkspeed, vy )end
+     player:setLinearVelocity(-walkspeed/1.3, player.vy )
+   else player:setLinearVelocity(-walkspeed, player.vy )end
  end
  if up_flag and (onGround(player)) then
-  player:setLinearVelocity(vx/1.3, -jampspeed )
+  player:setLinearVelocity(player.vx/1.3, -jampspeed )
  end
  if (down_flag) then
    player_death ()
