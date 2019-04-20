@@ -12,8 +12,8 @@ math.randomseed(os.time())
 local physics = require("physics")
 physics.start()
 --physics.setGravity(0,12)
-
-local module = require("module")
+require("mapbuild")
+require("animation")
 
 --построение карты
 -- local background = display.newImageRect( "background.png", display.actualContentWidth, display.actualContentHeight )
@@ -41,10 +41,15 @@ end
 timer.performWithDelay( 1000, timer_show ,-1 )
 
 --пресонаж
-local start_player_position_x = 100
-local start_player_position_y = display.contentCenterY
 
-local player = display.newRect(start_player_position_x,start_player_position_y,32,64)
+local player_options = {
+  start_x= 100,
+  start_y = display.contentCenterY,
+  width =32,
+  height = 64
+}
+
+local player = display.newRect(player_options.start_x,player_options.start_y,player_options.width,player_options.height)
 player:setFillColor(1,0.8,0)
 camera:add(player, 1)
 physics.addBody(player,"dynamic",{density=3.0,bounce = 0,friction = 1.0})
@@ -53,6 +58,13 @@ player.isFixedRotation = true
 local gold = {count = 0}
 gold.show = display.newText(gold.count, display.contentCenterX + display.actualContentWidth/2.2, 20, native.systemFont, 40)
 gold.show:setFillColor(1,1,0)
+local player_sprite = display.newSprite( player_sprite_sheet, sequences_player_run )
+
+player_sprite.yScale = player_options.height/(player_sprite_options.height-3)
+player_sprite.xScale = player_options.height/(player_sprite_options.height-3)
+player_sprite:play()
+camera:add(player_sprite, 1)
+
 
 --камера
 
@@ -102,6 +114,10 @@ local function eventChecker ()
   if catchGold(player)then
 
   end
+
+--привязка спрайта персонажа
+player_sprite.x=player.x
+player_sprite.y=player.y
 end
 
 Runtime:addEventListener( "enterFrame", eventChecker )
