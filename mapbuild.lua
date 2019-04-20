@@ -70,10 +70,11 @@ function mapbild (level)
       --твердые блоки
       if level.mapdata[i][j] == "B" then
         map[i][j] = {
-          rect=display.newRect(j*level.block_size+x,i*level.block_size+y,level.block_size,level.block_size),
+          rect=display.newImageRect("blocktexture.png",level.block_size,level.block_size),
           id = "block"
         }
-        map[i][j].rect:setFillColor(0.37, 0.56, 0.58)
+        map[i][j].rect.x=j*level.block_size+x
+        map[i][j].rect.y=i*level.block_size+y
         physics.addBody(map[i][j].rect,"static",{bounce = 0,friction = 1.0})
         camera:add(map[i][j].rect,1)
       end

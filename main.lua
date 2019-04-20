@@ -11,24 +11,29 @@ math.randomseed(os.time())
 
 local physics = require("physics")
 physics.start()
---physics.setGravity(0,12)
+-- physics.setGravity(0,0)
 require("mapbuild")
 require("animation")
 
 --построение карты
--- local background = display.newImageRect( "background.png", display.actualContentWidth, display.actualContentHeight )
--- background.x = display.contentCenterX
--- background.y = display.contentCenterY
 local level = {
   fileName = 'map.txt',
   block_size=50,
   width = 80,
-  height = 15,
+  height = 25,
 }
 
 level.mapdata = mapread (level)
 level.map = mapbild (level)
 
+--бэкграунд
+local backgroundImage = {
+  fileName="background.png",
+  height=2400,
+  width=3400
+}
+
+makeBackground(backgroundImage,level)
 
 --таймер
 local sec = 0
@@ -44,7 +49,7 @@ timer.performWithDelay( 1000, timer_show ,-1 )
 
 local player_options = {
   start_x= 100,
-  start_y = display.contentCenterY,
+  start_y = display.contentCenterY*1.3,
   width =32,
   height = 64,
   vx=0,
@@ -97,7 +102,7 @@ end
 
 camera:setFocus(player)
 camera:track()
-camera:setBounds(display.contentCenterX, level.width*level.block_size - display.contentCenterX, display.contentCenterY/2, display.contentCenterY*1.5)
+camera:setBounds(display.contentCenterX, level.width*level.block_size - display.contentCenterX, display.contentCenterY, display.contentCenterY)
 
 --детекторы касаний
 function onGround (obj)
@@ -150,6 +155,7 @@ Runtime:addEventListener( "enterFrame", eventChecker )
 function player_death ()
   player.x = player_options.start_x
   player.y = player_options.start_y
+  player:setLinearVelocity(0)
   sec=0
   gold.count=0
   gold.show.text=gold.count
