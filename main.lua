@@ -20,11 +20,11 @@ local level = {
   fileName = 'map.txt',
   block_size=50,
   width = 80,
-  height = 25,
+  height = 20,
 }
 
 level.mapdata = mapread (level)
-level.map = mapbild (level)
+level.map,level.border = mapbild (level)
 
 --бэкграунд
 local backgroundImage = {
@@ -114,17 +114,18 @@ camera:setBounds(display.contentCenterX, level.width*level.block_size - display.
 
 --детекторы касаний
 function onGround (obj)
-local i=math.ceil((bott_y(obj)+1)/level.block_size)
+  local i=math.ceil((bott_y(obj)+1)/level.block_size)
   for j=(math.ceil((left_x(obj))/level.block_size)),(math.ceil((rigth_x(obj))/level.block_size)) do
    if level.map[i][j].id=="block" then
      return true
    end
   end
   return false
+--  return true
 end
 
 local function inLava (obj)
-local i=math.ceil((bott_y(obj)+1)/level.block_size)
+  local i=math.ceil((bott_y(obj)+1)/level.block_size)
   for j=(math.ceil((left_x(obj))/level.block_size)),(math.ceil((rigth_x(obj))/level.block_size)) do
    if level.map[i][j].id=="lava" then
      return true
@@ -149,12 +150,20 @@ end
 
 --проверка в реальном времени
 local function eventChecker ()
+  --упал в лаву?
   if inLava(player) then
     player_death()
   end
+  --взял монету?
   catchGold(player)
+  --скорость персонажа
   player.vx,player.vy = player:getLinearVelocity()
+  --управление спрайтом персонажа
   spriteOritentation(player_sprite)
+  --упал в пустоту?
+  if bott_y(player)>=(level.height-0.1)*level.block_size then
+    player_death()
+  end
 end
 
 Runtime:addEventListener( "enterFrame", eventChecker )

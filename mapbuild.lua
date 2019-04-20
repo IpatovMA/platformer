@@ -114,7 +114,17 @@ function mapbild (level)
       camera:add(map[i][j].rect,1)
     end
   end
-  return map
+  local border = {
+    left =display.newRect(1,level.height*level.block_size/2,1,level.height*level.block_size),
+    top =display.newRect(level.width*level.block_size/2,1,level.width*level.block_size,1),
+    rigth =display.newRect(level.width*level.block_size,level.height*level.block_size/2,1,level.height*level.block_size),
+    bott =display.newRect(level.width*level.block_size/2,level.height*level.block_size,level.width*level.block_size,1),
+  }
+  for side, rect in pairs(border)do
+    physics.addBody(border[side],"static")
+    border[side].alpha = 0
+  end
+  return map,border
 end
 
 function rebuildmap (level)
