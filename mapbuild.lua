@@ -88,7 +88,7 @@ function mapbild (level)
             rect  = display.newSprite( coin_sprite_sheet, sequences_coin ),
             id = "gold"
           }
-          map[i][j].rect:setSequence("shine")
+          map[i][j].rect:setSequence("rotate")
           map[i][j].rect.yScale = coinScaling
           map[i][j].rect.xScale = coinScaling
           map[i][j].rect.x=j*level.block_size+x
@@ -110,29 +110,9 @@ function mapbild (level)
         map[i][j].rect:play()
         --physics.addBody(map[i][j].rect,"static",{bounce = 0,friction = 1.0})
       end
-      --монстер
-      -- if level.mapdata[i][j] == "M" then
-      --   map[i][j] = {
-      --   rect=display.newRect(j*level.block_size+x,i*level.block_size+y,level.block_size,level.block_size),
-      --     --rect  = display.newSprite( lava_sprite_sheet, sequences_lava),
-      --     id = "air"
-      --   }
-      --   map[i][j].rect.x=j*level.block_size+x
-      --   map[i][j].rect.y=i*level.block_size+y
-      --   map[i][j].rect.alpha = 0
-      --   l=l+1--счетчик врагов+1
-      --    enemies[#enemies+1]= enemySpawn(map[i][j].rect.x,map[i][j].rect.y,1)
-      --    -- print(l,enemies[l].rect.x)
-      -- end
 
       camera:add(map[i][j].rect,1)
     end
-    -- for m=1,l do
-    -- if enemies[m].type==1 then
-    --     print(i,m,enemies[m].rect.x)
-    --       enemies[m].rect:setFillColor(0,1.0,0)
-    -- end
-
   end
   local border = {
     left =display.newRect(1,level.height*level.block_size/2,10,level.height*level.block_size),
@@ -153,19 +133,13 @@ end
 function rebuildmap (level)
   local x = -level.block_size/2
   local y = -level.block_size/2
-  local enemies = {} --массив врагов
-  local l = 0 --счетчик врагов
   for i=1,level.height do
     for j=1,level.width do
       if level.mapdata[i][j] == "G" and level.map[i][j].id ~="gold" then
       level.map[i][j].id = "gold"
        level.map[i][j].rect.alpha = 1
        end
-       -- if level.mapdata[i][j] == "M" then
-       --   l=l+1--счетчик врагов+1
-       --   enemies[#enemies+1]= enemySpawn(map[i][j].rect.x,map[i][j].rect.y,1)
-       --   -- print(l,enemies[l].A_pos,enemies[1].A_pos)
-       -- end
+
     end
     end
 

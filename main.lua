@@ -87,85 +87,49 @@ local gold = {count = 0}
   gold.sprite:play()
 
 --  --спрайт
-local player_sprite = display.newSprite( player_sprite_sheet, sequences_player )
-  local spriteScale = player_options.height/(player_sprite_options.height-3)
+-- local player_sprite = display.newSprite(player_sprite_sheet, sequences_player )
+  --local spriteScale = player_options.height/(player_sprite_options.height-3)
+
+local player_sprite = display.newSprite( knight_sprite_sheet, sequences_knight )
+  local spriteScale =player_options.height/(50)
+  local knight_yfix=-3
   player_sprite.yScale = spriteScale
   player_sprite.xScale = spriteScale
   camera:add(player_sprite, 1)
 
-local function spriteOritentation(player_sprite)
-  if player.vx==0  then
-    if player_sprite.sequence ~= "stay" then
-    player_sprite:setSequence("stay")
-    -- print("s")
-      end
-  else
-    if player_sprite.sequence ~= "run" then
-    player_sprite:setSequence("run")
-      end
-      if player.vx > 0  then
-            player_sprite.xScale =spriteScale
-            -- print("r")
-          end
-      if player.vx < 0  then
-            player_sprite.xScale = -spriteScale
-            -- print("l")
 
-        end
+local function spriteOritentation(player_sprite)
+
+      if onGround(player) then
+  if player.vx==0  then
+    if player_sprite.sequence ~= "idle" then
+    player_sprite:setSequence("idle")
+    player_sprite:play()
+      end
+  elseif player_sprite.sequence ~= "run" then
+    player_sprite:setSequence("run")
+    player_sprite:play()
+      end
+    else
+      if player_sprite.sequence ~= "jump" then
+      player_sprite:setSequence("jump")
+      player_sprite:play()
+    end
     end
 
+    if player.vx > 0  then
+          player_sprite.xScale =spriteScale
+        end
+    if player.vx < 0  then
+          player_sprite.xScale = -spriteScale
+      end
 
-    if onGround(player) then
-          player_sprite:play()
-        else player_sprite:pause() end
-    -- print(player.vx,player.vy)
   --привязка спрайта персонажа
   player_sprite.x=player.x
-  player_sprite.y=player.y
+  player_sprite.y=player.y+knight_yfix
 end
+      player_sprite:play()
 
-local function enemySpriteOrientation (enemy)
-  enemy.vx,enemy.vy=enemy.rect:getLinearVelocity()
-  -- print(enemy.vx,enemy.vy,enemy.scaling)
-  if enemy.vx > 0  then
-        enemy.sprite.xScale = -enemy.scaling
-      end
-  if enemy.vx < 0  then
-        enemy.sprite.xScale = enemy.scaling
-    end
-    -- if onGround(enemy.rect) then
-          enemy.sprite:play()
-    -- else enemy.sprite:pause() end
-  enemy.sprite.x = enemy.rect.x
-  enemy.sprite.y = enemy.rect.y+enemy.y_fix
-
-end
-
-local function enemyWalk (enemy)
-
-    -- (left_x(enemy.rect)<=enemy.A_pos) and (Aflag=false) or (Aflag= true)
-    -- (rigth_x(enemy.rect)>=enemy.B_pos) and Bflag=true or Bflag=false
-  if left_x(enemy.rect)<=enemy.A then
-     enemy.A_pos_flag = false
-     enemy.B_pos_flag = true
-     -- print("A")
-  end
-  if rigth_x(enemy.rect)>=enemy.B then
-     enemy.A_pos_flag = true
-     enemy.B_pos_flag = false
-     -- print("B")
-  end
-  -- print(Aflag,Bflag)
-  if left_x(enemy.rect)>enemy.A and enemy.A_pos_flag then
-      enemy.rect:setLinearVelocity(-enemy.speed,enemy.vy)
-      -- print("A")
-  end
-  if rigth_x(enemy.rect)<enemy.B and enemy.B_pos_flag then
-      enemy.rect:setLinearVelocity(enemy.speed,enemy.vy)
-      -- print("B")
-  end
-  -- print("logging")
-end
 --камера
 camera:setFocus(player)
 camera:track()
@@ -262,7 +226,7 @@ function player_death ()
   gold.show.text=gold.count
 
   for i=1,enemies_count do
-    print(i,enemies[i].A)
+    -- print(i,enemies[i].A)
     physics.removeBody(enemies[i].rect)
       display.remove(enemies[i].rect)
       -- camera:remove(enemies[i].rect)
@@ -283,7 +247,7 @@ local left_flag = false
 local rigth_flag = false
 
 local walkspeed = 200
-local jampspeed = 250
+local jampspeed = 450
 
 
 local function walkplayer (event)
