@@ -123,6 +123,7 @@ function mapbild (level,enemies)
         map[i][j].rect.alpha = 0
         l=l+1--счетчик врагов+1
         enemies[l] = enemySpawn(map[i][j].rect.x,map[i][j].rect.y,1)
+        -- print(l,enemies[l].A_pos,enemies[1].A_pos)
       end
 
       camera:add(map[i][j].rect,1)
@@ -156,7 +157,7 @@ function rebuildmap (level,enemies)
        if level.mapdata[i][j] == "M" then
          l=l+1--счетчик врагов+1
          enemies[l] = enemySpawn(j*level.block_size+x,i*level.block_size+y,1)
-         print("enemyyyy")
+         -- print(l,enemies[l].A_pos,enemies[1].A_pos)
     end
     end
     end
@@ -175,7 +176,9 @@ enemy_options={
     height = 60,
     width = 50,
     scaling_fix=1.5,
-    y_fix=-5
+    y_fix=-5,
+    A_pos_flag=false,
+    B_pos_flag=true
   }
 }
 
@@ -191,11 +194,13 @@ function enemySpawn (x,y,type)
   enemy.sprite.x=x
   enemy.sprite.y=y+enemy.y_fix
   enemy.sprite:play()
-  enemy.rect.alpha=0
-  physics.addBody(enemy.rect,"dynamic",{bounce = 0,friction = 1.0})
+  enemy.rect.alpha=1
+  physics.addBody(enemy.rect,"dynamic",{density=3.0,bounce = 0.5,friction = 1.0})
   enemy.rect.isFixedRotation = true
   camera:add(enemy.rect,1)
   camera:add(enemy.sprite,1)
   enemy.A_pos = x
+  print(enemy.A_pos)
+
   return enemy
 end

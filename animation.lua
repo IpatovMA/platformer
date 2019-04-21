@@ -81,7 +81,7 @@ sequences_monster1= {
           name = "walk",
           start = 1,
           count = 26,
-          time = 2000,
+          time = 800,
           loopCount = 0,
           loopDirection = "forward"
       }

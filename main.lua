@@ -16,7 +16,8 @@ require("mapbuild")
 require("animation")
 
 --массив с врагами
-local enemies = {}
+-- --СДЕЛАТЬ ЛОКАЛЬНЫМ
+ enemies = {}
 local enemies_count
 
 
@@ -31,11 +32,11 @@ local level = {
 level.mapdata = mapread (level)
 level.map,level.border,enemies_count = mapbild (level,enemies)
 
-local enemies_B_pos = {12*level.block_size} --массив с точками Б для мобов, которые ходят
+local enemies_B_pos = {12*level.block_size,28*level.block_size,42*level.block_size,2*level.block_size} --массив с точками Б для мобов, которые ходят
 for l=1,enemies_count do
   local i = 1
   if enemies[l].type==1 then
-     enemies[l].B_pos= enemies_B_pos[i]
+     enemies[l].B_pos= enemies_B_pos[i]-level.block_size*0.5
      i=i+1
   end
 end
@@ -87,6 +88,7 @@ gold.sprite.xScale = 0.13
 gold.sprite.x=display.contentCenterX + display.actualContentWidth/2.2
 gold.sprite.y=20
 gold.sprite:play()
+
 --  --спрайт
 local player_sprite = display.newSprite( player_sprite_sheet, sequences_player )
 local spriteScale = player_options.height/(player_sprite_options.height-3)
@@ -98,23 +100,28 @@ local function spriteOritentation(player_sprite)
   if player.vx==0  then
     if player_sprite.sequence ~= "stay" then
     player_sprite:setSequence("stay")
+    -- print("s")
       end
   else
     if player_sprite.sequence ~= "run" then
     player_sprite:setSequence("run")
       end
-    end
-    if player.vx > 0  then
-          player_sprite.xScale =spriteScale
+      if player.vx > 0  then
+            player_sprite.xScale =spriteScale
+            -- print("r")
+          end
+      if player.vx < 0  then
+            player_sprite.xScale = -spriteScale
+            -- print("l")
+
         end
-    if player.vx < 0  then
-          player_sprite.xScale = -spriteScale
-      end
+    end
+
 
     if onGround(player) then
           player_sprite:play()
         else player_sprite:pause() end
-
+    -- print(player.vx,player.vy)
   --привязка спрайта персонажа
   player_sprite.x=player.x
   player_sprite.y=player.y
@@ -122,43 +129,47 @@ end
 
 local function enemySpriteOrientation (enemy)
   enemy.vx,enemy.vy=enemy.rect:getLinearVelocity()
+  -- print(enemy.vx,enemy.vy,enemy.scaling)
   if enemy.vx > 0  then
-        player_sprite.xScale =enemy.scaling
+        enemy.sprite.xScale = -enemy.scaling
       end
   if enemy.vx < 0  then
-        player_sprite.xScale = -enemy.scaling
+        enemy.sprite.xScale = enemy.scaling
     end
-    if onGround(enemy.rect) then
+    -- if onGround(enemy.rect) then
           enemy.sprite:play()
-        else enemy.sprite:pause() end
+    -- else enemy.sprite:pause() end
   enemy.sprite.x = enemy.rect.x
   enemy.sprite.y = enemy.rect.y+enemy.y_fix
 
 end
+
 local function enemyWalk (enemy)
-  local Aflag
-  local Bflag
+
+    -- (left_x(enemy.rect)<=enemy.A_pos) and (Aflag=false) or (Aflag= true)
+    -- (rigth_x(enemy.rect)>=enemy.B_pos) and Bflag=true or Bflag=false
   if left_x(enemy.rect)<=enemy.A_pos then
-     Aflag = false
-     Bflag = true
-     print(enemy.A_pos)
+     enemy.A_pos_flag = false
+     enemy.B_pos_flag = true
+     -- print("A")
   end
   if rigth_x(enemy.rect)>=enemy.B_pos then
-     Aflag = true
-     Bflag = false
-     print(left_x(enemy.rect),enemy.A_pos)
+     enemy.A_pos_flag = true
+     enemy.B_pos_flag = false
+     -- print("B")
   end
-  if left_x(enemy.rect)>enemy.A_pos and Aflag then
+  -- print(Aflag,Bflag)
+  if left_x(enemy.rect)>enemy.A_pos and enemy.A_pos_flag then
       enemy.rect:setLinearVelocity(-enemy.speed,enemy.vy)
-      print("A")
+      -- print("A")
   end
-  if rigth_x(enemy.rect)<enemy.B_pos and Bflag then
+  if rigth_x(enemy.rect)<enemy.B_pos and enemy.B_pos_flag then
       enemy.rect:setLinearVelocity(enemy.speed,enemy.vy)
-      print("B")
+      -- print("B")
   end
 
 
-  print("logging")
+  -- print("logging")
 end
 --камера
 camera:setFocus(player)
@@ -233,8 +244,9 @@ local function eventChecker ()
       enemySpriteOrientation (enemies[i])
       if enemies[i].type==1 then
         enemyWalk (enemies[i])
+      --  print(i,enemies_count)
       end
-
+      -- print(enemies[i].A_pos)
   end
 
   --упал в пустоту?
@@ -255,8 +267,11 @@ function player_death ()
   gold.show.text=gold.count
 
   for i=1,enemies_count do
+    print(i,enemies[i].A_pos)
+    physics.removeBody(enemies[i].rect)
       display.remove(enemies[i].rect)
       display.remove(enemies[i].sprite)
+
       --table.remove(enemies[i])
   end
 
@@ -269,8 +284,8 @@ local down_flag = false
 local left_flag = false
 local rigth_flag = false
 
-local walkspeed = 300
-local jampspeed = 350
+local walkspeed = 200
+local jampspeed = 250
 
 
 local function walkplayer (event)
