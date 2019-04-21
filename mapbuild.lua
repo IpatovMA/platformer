@@ -84,18 +84,17 @@ function mapbild (level,enemies)
       end
       --голда
       if level.mapdata[i][j] == "G" then
-        map[i][j] = {
-          --rect=display.newRect(j*level.block_size+x,i*level.block_size+y,level.block_size,level.block_size),
-          rect  = display.newSprite( coin_sprite_sheet, sequences_coin ),
-          id = "gold"
-        }
-        map[i][j].rect:setSequence("shine")
-        map[i][j].rect.yScale = coinScaling
-        map[i][j].rect.xScale = coinScaling
-        map[i][j].rect.x=j*level.block_size+x
-        map[i][j].rect.y=i*level.block_size+y
-        map[i][j].rect:play()
-
+          map[i][j] = {
+            --rect=display.newRect(j*level.block_size+x,i*level.block_size+y,level.block_size,level.block_size),
+            rect  = display.newSprite( coin_sprite_sheet, sequences_coin ),
+            id = "gold"
+          }
+          map[i][j].rect:setSequence("shine")
+          map[i][j].rect.yScale = coinScaling
+          map[i][j].rect.xScale = coinScaling
+          map[i][j].rect.x=j*level.block_size+x
+          map[i][j].rect.y=i*level.block_size+y
+          map[i][j].rect:play()
       end
       --лава
       if level.mapdata[i][j] == "L" then
@@ -111,7 +110,6 @@ function mapbild (level,enemies)
         map[i][j].rect.y=i*level.block_size+y
         map[i][j].rect:play()
         --physics.addBody(map[i][j].rect,"static",{bounce = 0,friction = 1.0})
-
       end
       --монстер
       if level.mapdata[i][j] == "M" then
@@ -173,7 +171,7 @@ enemy_options={
     sprite_options=monster1_sprite_options,
     sprite_sheet = monster1_sprite_sheet,
     sequence=sequences_monster1,
-    speed = 30,
+    speed = 100,
     height = 60,
     width = 50,
     scaling_fix=1.5,
@@ -193,11 +191,11 @@ function enemySpawn (x,y,type)
   enemy.sprite.x=x
   enemy.sprite.y=y+enemy.y_fix
   enemy.sprite:play()
+  enemy.rect.alpha=0
   physics.addBody(enemy.rect,"dynamic",{bounce = 0,friction = 1.0})
   enemy.rect.isFixedRotation = true
   camera:add(enemy.rect,1)
   camera:add(enemy.sprite,1)
-
-
+  enemy.A_pos = x
   return enemy
 end

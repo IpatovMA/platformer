@@ -19,6 +19,7 @@ require("animation")
 local enemies = {}
 local enemies_count
 
+
 --построение карты
 local level = {
   fileName = 'map.txt',
@@ -29,6 +30,15 @@ local level = {
 
 level.mapdata = mapread (level)
 level.map,level.border,enemies_count = mapbild (level,enemies)
+
+local enemies_B_pos = {12*level.block_size} --массив с точками Б для мобов, которые ходят
+for l=1,enemies_count do
+  local i = 1
+  if enemies[l].type==1 then
+     enemies[l].B_pos= enemies_B_pos[i]
+     i=i+1
+  end
+end
 
 --бэкграунд
 local backgroundImage = {
@@ -66,7 +76,7 @@ camera:add(player, 1)
 physics.addBody(player,"dynamic",{density=3.0,bounce = 0,friction = 1.0})
 player.isFixedRotation = true
 
---  --золото счетчик
+--золото счетчик
 local gold = {count = 0}
 gold.show = display.newText(gold.count, display.contentCenterX + display.actualContentWidth/2.4, 20, native.systemFont, 40)
 gold.show:setFillColor(1,1,0)
@@ -125,6 +135,31 @@ local function enemySpriteOrientation (enemy)
   enemy.sprite.y = enemy.rect.y+enemy.y_fix
 
 end
+local function enemyWalk (enemy)
+  local Aflag
+  local Bflag
+  if left_x(enemy.rect)<=enemy.A_pos then
+     Aflag = false
+     Bflag = true
+     print(enemy.A_pos)
+  end
+  if rigth_x(enemy.rect)>=enemy.B_pos then
+     Aflag = true
+     Bflag = false
+     print(left_x(enemy.rect),enemy.A_pos)
+  end
+  if left_x(enemy.rect)>enemy.A_pos and Aflag then
+      enemy.rect:setLinearVelocity(-enemy.speed,enemy.vy)
+      print("A")
+  end
+  if rigth_x(enemy.rect)<enemy.B_pos and Bflag then
+      enemy.rect:setLinearVelocity(enemy.speed,enemy.vy)
+      print("B")
+  end
+
+
+  print("logging")
+end
 --камера
 camera:setFocus(player)
 camera:track()
@@ -167,6 +202,20 @@ local function catchGold (obj)
   return false
 end
 
+-- local function touchEnemy (obj)
+--   for i = math.ceil((top_y(obj)-1)/level.block_size),math.ceil((bott_y(obj)+1)/level.block_size) do
+--     for j=(math.ceil((left_x(obj)-1)/level.block_size)),(math.ceil((rigth_x(obj)+1)/level.block_size)) do
+--      if level.map[i][j].id=="gold" then
+--        level.map[i][j].id="air"
+--        level.map[i][j].rect.alpha = 0
+--        gold.count=gold.count+1
+--        gold.show.text=gold.count
+--      end
+--     end
+--   end
+--   return false
+-- end
+
 --проверка в реальном времени
 local function eventChecker ()
   --упал в лаву?
@@ -179,9 +228,13 @@ local function eventChecker ()
   player.vx,player.vy = player:getLinearVelocity()
   --управление спрайтом персонажа
   spriteOritentation(player_sprite)
-  --управление спрайтами врагов
+  --управление спрайтами и передвижением врагов
   for i=1,enemies_count do
       enemySpriteOrientation (enemies[i])
+      if enemies[i].type==1 then
+        enemyWalk (enemies[i])
+      end
+
   end
 
   --упал в пустоту?
