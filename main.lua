@@ -14,15 +14,16 @@ physics.start()
 -- physics.setGravity(0,0)
 require("mapbuild")
 require("animation")
+require("enemies")
 
 --массив с врагами
--- --СДЕЛАТЬ ЛОКАЛЬНЫМ
- enemies = {}
+
+local enemies = {}
 local enemies_count
 
-
 --построение карты
-local level = {
+-- --СДЕЛАТЬ ЛОКАЛЬНЫМ
+ local level = {
   fileName = 'map.txt',
   block_size=50,
   width = 50,
@@ -30,16 +31,30 @@ local level = {
 }
 
 level.mapdata = mapread (level)
-level.map,level.border,enemies_count = mapbild (level,enemies)
+level.map,level.border,enemies,enemies_count = mapbild (level,enemies)
+-- print(enemies[1].rect.x)
 
-local enemies_B_pos = {12*level.block_size,28*level.block_size,42*level.block_size,2*level.block_size} --массив с точками Б для мобов, которые ходят
-for l=1,enemies_count do
-  local i = 1
-  if enemies[l].type==1 then
-     enemies[l].B_pos= enemies_B_pos[i]-level.block_size*0.5
-     i=i+1
-  end
+--спаун мобов
+local enemies = spawnthemall(level) --массив врагов
+local enemies_count = #enemies_start_pos -- счетчик врагов
+
+
+-- for i=1,enemies_count do
+--     print(i,enemies[i].rect.x)
+-- end
+for i=1,enemies_count do
+if enemies[i].type==1 then
+    -- print(i,enemies[i].rect.x)
+      enemies[i].rect:setFillColor(1,0,0)
 end
+end
+-- for i=1,enemies_count do
+--  --print(i,enemies[i].type,bebe)
+--  if enemies[i].type==1 then
+--  print(i,enemies[i].A)
+--   enemies[i].rect:setFillColor(1,0,0)
+-- end
+-- end
 
 --бэкграунд
 local backgroundImage = {
@@ -79,22 +94,22 @@ player.isFixedRotation = true
 
 --золото счетчик
 local gold = {count = 0}
-gold.show = display.newText(gold.count, display.contentCenterX + display.actualContentWidth/2.4, 20, native.systemFont, 40)
-gold.show:setFillColor(1,1,0)
-gold.sprite = display.newSprite( coin_sprite_sheet, sequences_coin )
-gold.sprite:setSequence("shine")
-gold.sprite.yScale = 0.13
-gold.sprite.xScale = 0.13
-gold.sprite.x=display.contentCenterX + display.actualContentWidth/2.2
-gold.sprite.y=20
-gold.sprite:play()
+  gold.show = display.newText(gold.count, display.contentCenterX + display.actualContentWidth/2.4, 20, native.systemFont, 40)
+  gold.show:setFillColor(1,1,0)
+  gold.sprite = display.newSprite( coin_sprite_sheet, sequences_coin )
+  gold.sprite:setSequence("shine")
+  gold.sprite.yScale = 0.13
+  gold.sprite.xScale = 0.13
+  gold.sprite.x=display.contentCenterX + display.actualContentWidth/2.2
+  gold.sprite.y=20
+  gold.sprite:play()
 
 --  --спрайт
 local player_sprite = display.newSprite( player_sprite_sheet, sequences_player )
-local spriteScale = player_options.height/(player_sprite_options.height-3)
-player_sprite.yScale = spriteScale
-player_sprite.xScale = spriteScale
-camera:add(player_sprite, 1)
+  local spriteScale = player_options.height/(player_sprite_options.height-3)
+  player_sprite.yScale = spriteScale
+  player_sprite.xScale = spriteScale
+  camera:add(player_sprite, 1)
 
 local function spriteOritentation(player_sprite)
   if player.vx==0  then
@@ -148,27 +163,25 @@ local function enemyWalk (enemy)
 
     -- (left_x(enemy.rect)<=enemy.A_pos) and (Aflag=false) or (Aflag= true)
     -- (rigth_x(enemy.rect)>=enemy.B_pos) and Bflag=true or Bflag=false
-  if left_x(enemy.rect)<=enemy.A_pos then
+  if left_x(enemy.rect)<=enemy.A then
      enemy.A_pos_flag = false
      enemy.B_pos_flag = true
      -- print("A")
   end
-  if rigth_x(enemy.rect)>=enemy.B_pos then
+  if rigth_x(enemy.rect)>=enemy.B then
      enemy.A_pos_flag = true
      enemy.B_pos_flag = false
      -- print("B")
   end
   -- print(Aflag,Bflag)
-  if left_x(enemy.rect)>enemy.A_pos and enemy.A_pos_flag then
+  if left_x(enemy.rect)>enemy.A and enemy.A_pos_flag then
       enemy.rect:setLinearVelocity(-enemy.speed,enemy.vy)
       -- print("A")
   end
-  if rigth_x(enemy.rect)<enemy.B_pos and enemy.B_pos_flag then
+  if rigth_x(enemy.rect)<enemy.B and enemy.B_pos_flag then
       enemy.rect:setLinearVelocity(enemy.speed,enemy.vy)
       -- print("B")
   end
-
-
   -- print("logging")
 end
 --камера
@@ -244,13 +257,13 @@ local function eventChecker ()
       enemySpriteOrientation (enemies[i])
       if enemies[i].type==1 then
         enemyWalk (enemies[i])
-      --  print(i,enemies_count)
+        -- print(enemies[i].rect.x)
       end
-      -- print(enemies[i].A_pos)
   end
-
+  -- enemySpriteOrientation (enemies[i])
+  -- enemyWalk (enemies[2])
   --упал в пустоту?
-  if bott_y(player)>=(level.height-0.1)*level.block_size then
+  if bott_y(player)>=(level.height-0.2)*level.block_size then
     player_death()
   end
 end
@@ -267,15 +280,18 @@ function player_death ()
   gold.show.text=gold.count
 
   for i=1,enemies_count do
-    print(i,enemies[i].A_pos)
+    print(i,enemies[i].A)
     physics.removeBody(enemies[i].rect)
       display.remove(enemies[i].rect)
+      -- camera:remove(enemies[i].rect)
       display.remove(enemies[i].sprite)
-
+      -- camera:remove(enemies[i].sprite)
       --table.remove(enemies[i])
   end
 
-    level.map,enemies,enemies_count = rebuildmap(level,enemies)
+    level.map,enemies,enemies_count = rebuildmap(level)
+     enemies = spawnthemall(level) --массив врагов
+     enemies_count = #enemies_start_pos -- счетчик врагов
 end
 
 --управение
