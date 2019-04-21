@@ -144,38 +144,27 @@ function mapbild (level,enemies)
   return map,border,l
 end
 
-function rebuildmap (level)
-
+function rebuildmap (level,enemies)
+  local x = -level.block_size/2
+  local y = -level.block_size/2
+  local l = 0 --счетчик врагов
   for i=1,level.height do
 
     for j=1,level.width do
       if level.mapdata[i][j] == "G" and level.map[i][j].id ~="gold" then
-
       level.map[i][j].id = "gold"
        level.map[i][j].rect.alpha = 1
+       end
+       if level.mapdata[i][j] == "M" then
+         l=l+1--счетчик врагов+1
+         enemies[l] = enemySpawn(j*level.block_size+x,i*level.block_size+y,1)
+         print("enemyyyy")
+    end
+    end
+    end
+    return level.map,enemies,l
+    end
 
-      end
-    end
-    end
-    return level.map
-    end
--- --связка двух карт в одну, у второй приоритет
--- function mapConnect (map1,map2,level.block_size,level.width,level.height)
---   for i=1,level.height do
---     for j=1,level.width do
---       if map2[i][j].rect then
---         -- if map1[i][j]~=map2[i][j]then
---       --  physics.removeBody(map1[i][j].rect)
---         display.remove(map1[i][j].rect)
---         map1[i][j]=map2[i][j]
---       --  physics.addBody(map1[i][j].rect,"static",{bounce = 0,friction = 1.0})
---         print(i,j)
---       -- end
---     end
---     end
---     end
---     return map1
--- end
 enemy_options={
     {
     name='green_monster',
@@ -188,7 +177,7 @@ enemy_options={
     height = 60,
     width = 50,
     scaling_fix=1.5,
-    y_fix=-10
+    y_fix=-5
   }
 }
 

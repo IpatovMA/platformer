@@ -122,7 +122,7 @@ local function enemySpriteOrientation (enemy)
           enemy.sprite:play()
         else enemy.sprite:pause() end
   enemy.sprite.x = enemy.rect.x
-  enemy.sprite.y = enemy.rect.y
+  enemy.sprite.y = enemy.rect.y+enemy.y_fix
 
 end
 --камера
@@ -181,7 +181,6 @@ local function eventChecker ()
   spriteOritentation(player_sprite)
   --управление спрайтами врагов
   for i=1,enemies_count do
-
       enemySpriteOrientation (enemies[i])
   end
 
@@ -201,8 +200,14 @@ function player_death ()
   sec=0
   gold.count=0
   gold.show.text=gold.count
-  level.map = rebuildmap(level)
 
+  for i=1,enemies_count do
+      display.remove(enemies[i].rect)
+      display.remove(enemies[i].sprite)
+      --table.remove(enemies[i])
+  end
+
+    level.map,enemies,enemies_count = rebuildmap(level,enemies)
 end
 
 --управение
@@ -232,7 +237,7 @@ local function walkplayer (event)
   player:setLinearVelocity(player.vx/1.3, -jampspeed )
  end
  if (down_flag) then
-   --player_death ()
+   player_death ()
  end
  -- if not(rigth_flag) and not(left_flag) and not(up_flag) then
  --    player:setLinearVelocity(0)
