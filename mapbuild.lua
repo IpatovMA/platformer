@@ -1,3 +1,4 @@
+require("animation")
 --координаты
 --x
 rigth_x = function (obj)
@@ -50,18 +51,19 @@ function mapread (level)
 
   return mapdata
 end
-function mapbild (level)
+function mapbild (level,enemies)
 
     local x = -level.block_size/2
     local y = -level.block_size/2
     local coinScaling = level.block_size/coin_sprite_options.height*0.9
     local lavaScaling = level.block_size/lava_sprite_options.height
+    local l = 0 -- счетчик врагов
     local map = {}
   for i=1,level.height do
     map[i] = {}
     for j=1,level.width do
       --пустые блоки
-      if level.mapdata[i][j] == "z" then
+      if level.mapdata[i][j] ==  "z"then
         map[i][j] = {
           rect=display.newRect(j*level.block_size+x,i*level.block_size+y,level.block_size,level.block_size),
           id = "air"
@@ -87,7 +89,7 @@ function mapbild (level)
           rect  = display.newSprite( coin_sprite_sheet, sequences_coin ),
           id = "gold"
         }
-        map[i][j].rect:setSequence(rotate)
+        map[i][j].rect:setSequence("shine")
         map[i][j].rect.yScale = coinScaling
         map[i][j].rect.xScale = coinScaling
         map[i][j].rect.x=j*level.block_size+x
@@ -108,9 +110,23 @@ function mapbild (level)
         map[i][j].rect.x=j*level.block_size+x
         map[i][j].rect.y=i*level.block_size+y
         map[i][j].rect:play()
-        physics.addBody(map[i][j].rect,"static",{bounce = 0,friction = 1.0})
+        --physics.addBody(map[i][j].rect,"static",{bounce = 0,friction = 1.0})
 
       end
+      --монстер
+      if level.mapdata[i][j] == "M" then
+        map[i][j] = {
+        rect=display.newRect(j*level.block_size+x,i*level.block_size+y,level.block_size,level.block_size),
+          --rect  = display.newSprite( lava_sprite_sheet, sequences_lava),
+          id = "air"
+        }
+        map[i][j].rect.x=j*level.block_size+x
+        map[i][j].rect.y=i*level.block_size+y
+        map[i][j].rect.alpha = 0
+        l=l+1--счетчик врагов+1
+        enemies[l] = enemySpawn(map[i][j].rect.x,map[i][j].rect.y,1)
+      end
+
       camera:add(map[i][j].rect,1)
     end
   end
@@ -123,8 +139,9 @@ function mapbild (level)
   for side, rect in pairs(border)do
     physics.addBody(border[side],"static")
     border[side].alpha = 0
+    camera:add(border[side],1)
   end
-  return map,border
+  return map,border,l
 end
 
 function rebuildmap (level)
@@ -159,3 +176,39 @@ function rebuildmap (level)
 --     end
 --     return map1
 -- end
+enemy_options={
+    {
+    name='green_monster',
+    type=1,
+    file="green_monster.png",
+    sprite_options=monster1_sprite_options,
+    sprite_sheet = monster1_sprite_sheet,
+    sequence=sequences_monster1,
+    speed = 30,
+    height = 60,
+    width = 50,
+    scaling_fix=1.5,
+    y_fix=-10
+  }
+}
+
+function enemySpawn (x,y,type)
+
+ local enemy=enemy_options[type]
+  enemy.scaling=enemy.height/enemy.sprite_options.height*enemy.scaling_fix
+  enemy.rect = display.newRect(x,y,enemy.width,enemy.height)
+  enemy.sprite= display.newSprite(enemy.sprite_sheet, enemy.sequence)
+--  enemy.sprite:setSequence("walk")
+  enemy.sprite.yScale = enemy.scaling
+  enemy.sprite.xScale = enemy.scaling
+  enemy.sprite.x=x
+  enemy.sprite.y=y+enemy.y_fix
+  enemy.sprite:play()
+  physics.addBody(enemy.rect,"dynamic",{bounce = 0,friction = 1.0})
+  enemy.rect.isFixedRotation = true
+  camera:add(enemy.rect,1)
+  camera:add(enemy.sprite,1)
+
+
+  return enemy
+end

@@ -15,16 +15,20 @@ physics.start()
 require("mapbuild")
 require("animation")
 
+--массив с врагами
+local enemies = {}
+local enemies_count
+
 --построение карты
 local level = {
   fileName = 'map.txt',
   block_size=50,
-  width = 80,
+  width = 50,
   height = 20,
 }
 
 level.mapdata = mapread (level)
-level.map,level.border = mapbild (level)
+level.map,level.border,enemies_count = mapbild (level,enemies)
 
 --бэкграунд
 local backgroundImage = {
@@ -61,8 +65,8 @@ player.alpha = 0
 camera:add(player, 1)
 physics.addBody(player,"dynamic",{density=3.0,bounce = 0,friction = 1.0})
 player.isFixedRotation = true
---  --золото счетчик
 
+--  --золото счетчик
 local gold = {count = 0}
 gold.show = display.newText(gold.count, display.contentCenterX + display.actualContentWidth/2.4, 20, native.systemFont, 40)
 gold.show:setFillColor(1,1,0)
@@ -81,36 +85,51 @@ player_sprite.xScale = spriteScale
 camera:add(player_sprite, 1)
 
 local function spriteOritentation(player_sprite)
-if player.vx==0  then
-  if player_sprite.sequence ~= "stay" then
-  player_sprite:setSequence("stay")
-    end
-else
-  if player_sprite.sequence ~= "run" then
-  player_sprite:setSequence("run")
-    end
-  end
-  if player.vx > 0  then
-        player_sprite.xScale =spriteScale
+  if player.vx==0  then
+    if player_sprite.sequence ~= "stay" then
+    player_sprite:setSequence("stay")
       end
-  if player.vx < 0  then
-        player_sprite.xScale = -spriteScale
+  else
+    if player_sprite.sequence ~= "run" then
+    player_sprite:setSequence("run")
+      end
     end
+    if player.vx > 0  then
+          player_sprite.xScale =spriteScale
+        end
+    if player.vx < 0  then
+          player_sprite.xScale = -spriteScale
+      end
 
-  if onGround(player) then
-        player_sprite:play()
-      else player_sprite:pause() end
+    if onGround(player) then
+          player_sprite:play()
+        else player_sprite:pause() end
 
---привязка спрайта персонажа
-player_sprite.x=player.x
-player_sprite.y=player.y
+  --привязка спрайта персонажа
+  player_sprite.x=player.x
+  player_sprite.y=player.y
 end
 
---камера
+local function enemySpriteOrientation (enemy)
+  enemy.vx,enemy.vy=enemy.rect:getLinearVelocity()
+  if enemy.vx > 0  then
+        player_sprite.xScale =enemy.scaling
+      end
+  if enemy.vx < 0  then
+        player_sprite.xScale = -enemy.scaling
+    end
+    if onGround(enemy.rect) then
+          enemy.sprite:play()
+        else enemy.sprite:pause() end
+  enemy.sprite.x = enemy.rect.x
+  enemy.sprite.y = enemy.rect.y
 
+end
+--камера
 camera:setFocus(player)
 camera:track()
 camera:setBounds(display.contentCenterX, level.width*level.block_size - display.contentCenterX, display.contentCenterY, display.contentCenterY)
+
 
 --детекторы касаний
 function onGround (obj)
@@ -160,6 +179,12 @@ local function eventChecker ()
   player.vx,player.vy = player:getLinearVelocity()
   --управление спрайтом персонажа
   spriteOritentation(player_sprite)
+  --управление спрайтами врагов
+  for i=1,enemies_count do
+
+      enemySpriteOrientation (enemies[i])
+  end
+
   --упал в пустоту?
   if bott_y(player)>=(level.height-0.1)*level.block_size then
     player_death()
@@ -207,7 +232,7 @@ local function walkplayer (event)
   player:setLinearVelocity(player.vx/1.3, -jampspeed )
  end
  if (down_flag) then
-   player_death ()
+   --player_death ()
  end
  -- if not(rigth_flag) and not(left_flag) and not(up_flag) then
  --    player:setLinearVelocity(0)
