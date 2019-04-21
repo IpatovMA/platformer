@@ -22,7 +22,7 @@ local enemies = {}
 local enemies_count
 
 --построение карты
--- --СДЕЛАТЬ ЛОКАЛЬНЫМ
+
  local level = {
   fileName = 'map.txt',
   block_size=50,
@@ -32,29 +32,11 @@ local enemies_count
 
 level.mapdata = mapread (level)
 level.map,level.border,enemies,enemies_count = mapbild (level,enemies)
--- print(enemies[1].rect.x)
 
 --спаун мобов
 local enemies = spawnthemall(level) --массив врагов
-local enemies_count = #enemies_start_pos -- счетчик врагов
+local enemies_count = #enemies -- счетчик врагов
 
-
--- for i=1,enemies_count do
---     print(i,enemies[i].rect.x)
--- end
-for i=1,enemies_count do
-if enemies[i].type==1 then
-    -- print(i,enemies[i].rect.x)
-      enemies[i].rect:setFillColor(1,0,0)
-end
-end
--- for i=1,enemies_count do
---  --print(i,enemies[i].type,bebe)
---  if enemies[i].type==1 then
---  print(i,enemies[i].A)
---   enemies[i].rect:setFillColor(1,0,0)
--- end
--- end
 
 --бэкграунд
 local backgroundImage = {
@@ -291,7 +273,7 @@ function player_death ()
 
     level.map,enemies,enemies_count = rebuildmap(level)
      enemies = spawnthemall(level) --массив врагов
-     enemies_count = #enemies_start_pos -- счетчик врагов
+     enemies_count = #enemies -- счетчик врагов
 end
 
 --управение
