@@ -16,7 +16,7 @@ sequences_player = {
         loopDirection = "forward"
     },
     {
-      name = "stay",
+      name = "idle",
       start = 1,
       count = 4,
       time = 1000,
@@ -25,6 +25,42 @@ sequences_player = {
     }
 }
 
+
+kinght_sprite_options =
+{
+    width = 94.4,
+    height = 75.1,
+    numFrames = 70
+}
+
+knight_sprite_sheet = graphics.newImageSheet("knight.png",kinght_sprite_options)
+sequences_knight = {
+   {
+        name = "run",
+        start = 60,
+        count = 10,
+        time = 500,
+        loopCount = 0,
+        loopDirection = "forward"
+    },
+    {
+      name = "idle",
+      -- start = 21,
+      -- count = 10,
+      frames = {21,22,23,24,25,26,27,28,29,30,29,28,27,26,25,24,23,22},
+      time = 1500,
+      loopCount = 0,
+      loopDirection = "forward"
+    },
+    {
+         name = "jump",
+         start = 30,
+         count = 5,
+         time = 600,
+         loopCount = 1,
+         loopDirection = "forward"
+     }
+}
 coin_sprite_options =
 {
     width = 256,
@@ -95,6 +131,7 @@ function makeBackground(backgroundImage,level)
     background[i] = display.newImageRect( backgroundImage.fileName ,backgroundImage.width*scaling, display.actualContentHeight )
     background[i].x = backgroundImage.width*scaling*(i-1)
     background[i].y = display.contentCenterY
+    -- background[i]:setFillColor(1, 0.49, 0.13, 0.76)
     camera:add(background[i], 2)
 
   end

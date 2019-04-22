@@ -1,15 +1,15 @@
 
 --статы мобов
 local enemies_start_pos={
-[1]={x=8,y=12 ,type=1,A=5,B=12},
-[2]={x=35,y=13,type=1,A=31,B=42},
-[3]={x=7,y=15,type=1,A=3,B=13},
-[4]={x=23,y=15,type=1,A=20,B=28}
+{x=8,y=12 ,type=1,A=5,B=12}
+-- ,{x=35,y=13,type=1,A=31,B=42}
+-- ,{x=7,y=15,type=1,A=3,B=3}
+-- ,{x=23,y=15,type=1,A=20,B=28}
 }
 
 enemy_options={
 [1]={
-    name='green_monster',
+    name='monster',
     type=1,
     file="green_monster.png",
     sprite_options=monster1_sprite_options,
@@ -36,24 +36,27 @@ function enemySpawn (start_pos,level)
 
   enemy.scaling=enemy.height/enemy.sprite_options.height*enemy.scaling_fix
   enemy.rect = display.newRect((start_pos.x-0.5)*level.block_size,(start_pos.y-0.5)*level.block_size,enemy.width,enemy.height)
-  enemy.sprite= display.newSprite(enemy.sprite_sheet, enemy.sequence)
+  enemy.rect.sprite= display.newSprite(enemy.sprite_sheet, enemy.sequence)
 --  enemy.sprite:setSequence("walk")
-  enemy.sprite.yScale = enemy.scaling
-  enemy.sprite.xScale = enemy.scaling
-  enemy.sprite.x=(start_pos.x-0.5)*level.block_size
-  enemy.sprite.y=(start_pos.y-0.5)*level.block_size+enemy.y_fix
-  enemy.sprite:play()
+  enemy.rect.sprite.yScale = enemy.scaling
+  enemy.rect.sprite.xScale = enemy.scaling
+  enemy.rect.sprite.x=(start_pos.x-0.5)*level.block_size
+  enemy.rect.sprite.y=(start_pos.y-0.5)*level.block_size+enemy.y_fix
+  enemy.rect.sprite:play()
   enemy.rect.alpha=0
-  physics.addBody(enemy.rect,"dynamic",{density=3.0,bounce = 0.5,friction = 1.0})
+  physics.addBody(enemy.rect,"dynamic",{density=3.0,bounce = 1,friction =0.0})
   enemy.rect.isFixedRotation = true
+  enemy.rect.id = "enemy"
+  enemy.rect.num = 1
   camera:add(enemy.rect,1)
-  camera:add(enemy.sprite,1)
+  camera:add(enemy.rect.sprite,1)
   if enemy.type==1 then
      enemy.A = (start_pos.A+0.5)*level.block_size
      enemy.B = (start_pos.B-0.5)*level.block_size
   end
   return enemy
 end
+
 
 --спавнить всех
 function spawnthemall (level)
@@ -65,23 +68,46 @@ function spawnthemall (level)
   return enemies
 end
 
+--диспавнить одного
+function enemyKill (enemy)
+    display.remove(enemy.sprite)
+  display.remove(enemy)
+
+
+  -- --костыль
+  -- table.remove(enemy)
+end
+--убить всех мобов
+function killallenemies (enemies)
+  for i , enemy in ipairs(enemies) do
+       enemyKill(enemy.rect)
+  end
+end
+
 --передвижение мобов
 function enemySpriteOrientation (enemy)
+  -- if enemy.rect then
+  --   print(enemy.rect.id)
   enemy.vx,enemy.vy=enemy.rect:getLinearVelocity()
 
   if enemy.vx > 0  then
-        enemy.sprite.xScale = -enemy.scaling
+        enemy.rect.sprite.xScale = -enemy.scaling
       end
   if enemy.vx < 0  then
-        enemy.sprite.xScale = enemy.scaling
+        enemy.rect.sprite.xScale = enemy.scaling
     end
     -- if onGround(enemy.rect) then
-          enemy.sprite:play()
+          enemy.rect.sprite:play()
     -- else enemy.sprite:pause() end
-  enemy.sprite.x = enemy.rect.x
-  enemy.sprite.y = enemy.rect.y+enemy.y_fix
+  enemy.rect.sprite.x = enemy.rect.x
+  enemy.rect.sprite.y = enemy.rect.y+enemy.y_fix
 
+-- else   table.remove(enemy)
+--   print("logging")
+-- end
 end
+
+
 
 function enemyWalk (enemy)
 

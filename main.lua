@@ -19,7 +19,6 @@ require("enemies")
 --массив с врагами
 
 local enemies = {}
-local enemies_count
 
 --построение карты
 
@@ -31,11 +30,10 @@ local enemies_count
 }
 
 level.mapdata = mapread (level)
-level.map,level.border,enemies,enemies_count = mapbild (level,enemies)
+level.map,level.border = mapbild (level)
 
 --спаун мобов
 local enemies = spawnthemall(level) --массив врагов
-local enemies_count = #enemies -- счетчик врагов
 
 
 --бэкграунд
@@ -199,7 +197,7 @@ local function eventChecker ()
   --управление спрайтом персонажа
   spriteOritentation(player_sprite)
   --управление спрайтами и передвижением врагов
-  for i=1,enemies_count do
+  for i=1,#enemies do
       enemySpriteOrientation (enemies[i])
       if enemies[i].type==1 then
         enemyWalk (enemies[i])
@@ -225,19 +223,10 @@ function player_death ()
   gold.count=0
   gold.show.text=gold.count
 
-  for i=1,enemies_count do
-    -- print(i,enemies[i].A)
-    physics.removeBody(enemies[i].rect)
-      display.remove(enemies[i].rect)
-      -- camera:remove(enemies[i].rect)
-      display.remove(enemies[i].sprite)
-      -- camera:remove(enemies[i].sprite)
-      --table.remove(enemies[i])
-  end
+  killallenemies (enemies)
 
-    level.map,enemies,enemies_count = rebuildmap(level)
+    level.map,enemies = rebuildmap(level)
      enemies = spawnthemall(level) --массив врагов
-     enemies_count = #enemies -- счетчик врагов
 end
 
 --управение
@@ -307,9 +296,17 @@ Runtime:addEventListener("key", keyboardcontrol)
 Runtime:addEventListener( "enterFrame", walkplayer )
 
 local function onLocalCollision( self, event )
-    if event.other.id== "enemy" then
+    if event.other.id== "enemy"  then
+      if bott_y(event.target)-10>top_y(event.other) then
       timer.performWithDelay( 10, player_death ,1 )
+    else
+      -- timer.performWithDelay( 10, enemyKill(event.other) ,1 )
+     event.other.sprite:setFillColor(1,0,0,0.3)
+     event.other.id= "none"
+      end
     end
+    --print( event.target.x )        --the first object in the collision
+-- print( event.other.x )
 end
 player.collision = onLocalCollision
 player:addEventListener( "collision" )
