@@ -206,7 +206,7 @@ local function eventChecker ()
         -- print(enemies[i].rect.x)
       end
   end
-  -- enemySpriteOrientation (enemies[i])
+
   -- enemyWalk (enemies[2])
   --упал в пустоту?
   if bott_y(player)>=(level.height-0.2)*level.block_size then
@@ -247,7 +247,7 @@ local left_flag = false
 local rigth_flag = false
 
 local walkspeed = 200
-local jampspeed = 450
+local jampspeed = 250
 
 
 local function walkplayer (event)
@@ -269,9 +269,19 @@ local function walkplayer (event)
  if (down_flag) then
    player_death ()
  end
- -- if not(rigth_flag) and not(left_flag) and not(up_flag) then
- --    player:setLinearVelocity(0)
- -- end
+  --убираем скольжение
+   -- if not(left_flag) and player.vx<0 and (onGround(player)) then
+   --   player:setLinearVelocity(0,player.vy)
+   --   print("(l)")
+   -- end
+   -- if not(right_flag) and player.vx>0 and (onGround(player)) then
+   --   player:setLinearVelocity(0,player.vy)
+   --   print("(r)")
+   -- end
+   -- print((rigth_flag))
+   -- if not(rigth_flag) and not(left_flag) and not(up_flag) then
+   --    player:setLinearVelocity(0)
+   -- end
 end
 
 local function keyboardcontrol(event)
@@ -295,3 +305,11 @@ end
 
 Runtime:addEventListener("key", keyboardcontrol)
 Runtime:addEventListener( "enterFrame", walkplayer )
+
+local function onLocalCollision( self, event )
+    if event.other.id== "enemy" then
+      timer.performWithDelay( 10, player_death ,1 )
+    end
+end
+player.collision = onLocalCollision
+player:addEventListener( "collision" )
