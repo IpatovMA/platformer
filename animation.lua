@@ -123,6 +123,41 @@ sequences_monster1= {
       }
     }
 
+    monster2_sprite_options =
+      {
+          width = 543,
+          height = 498,
+          numFrames = 14
+      }
+monster2_sprite_sheet = graphics.newImageSheet("stone_monster.png",monster2_sprite_options)
+sequences_monster2= {
+     {
+          name = "idle",
+          start = 1,
+          count = 14,
+          time = 1000,
+          loopCount = 0,
+          loopDirection = "forward"
+      }
+    }
+
+stoneball_sprite_options =
+{
+width = 72,
+height = 72,
+numFrames = 19
+}
+stoneball_sprite_sheet = graphics.newImageSheet("stoneball.png",stoneball_sprite_options)
+sequences_stoneball= {
+{
+    name = "rotate",
+    start = 1,
+    count = 19,
+    time = 800,
+    loopCount = 0,
+    loopDirection = "forward"
+}
+}
 
 function makeBackground(backgroundImage,level)
   local scaling = display.actualContentHeight /backgroundImage.height

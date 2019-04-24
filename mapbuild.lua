@@ -2,7 +2,7 @@ require("animation")
 require("enemies")
 --координаты
 --x
-rigth_x = function (obj)
+right_x = function (obj)
   local x = obj.x + obj.width/2
   return x
 end
@@ -94,6 +94,7 @@ function mapbild (level)
           map[i][j].rect.x=j*level.block_size+x
           map[i][j].rect.y=i*level.block_size+y
           map[i][j].rect:play()
+          -- map[i][j].rect.id = "gold"
       end
       --лава
       if level.mapdata[i][j] == "L" then
@@ -117,7 +118,7 @@ function mapbild (level)
   local border = {
     left =display.newRect(1,level.height*level.block_size/2,10,level.height*level.block_size),
     top =display.newRect(level.width*level.block_size/2,1,level.width*level.block_size,10),
-    rigth =display.newRect(level.width*level.block_size,level.height*level.block_size/2,10,level.height*level.block_size),
+    right =display.newRect(level.width*level.block_size,level.height*level.block_size/2,10,level.height*level.block_size),
     bott =display.newRect(level.width*level.block_size/2,level.height*level.block_size,level.width*level.block_size,10),
   }
   for side, rect in pairs(border)do
