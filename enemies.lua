@@ -3,7 +3,7 @@
 local enemies_start_pos={
 {x=4,y=15 ,type=1,A=5,B=12}
 -- ,{x=35,y=13,type=1,A=31,B=42}
-,{x=8,y=12,type=2,t1=5,t2=100}
+,{x=8,y=12,type=2,t1=2,t2=8}
 -- ,{x=23,y=15,type=1,A=20,B=28}
 }
 
@@ -64,6 +64,12 @@ function enemySpawn (start_pos,level)
   if enemy.type==1 then
      enemy.A = (start_pos.A+0.5)*level.block_size
      enemy.B = (start_pos.B-0.5)*level.block_size
+  end
+  if enemy.type==2 then
+    enemy.t1 = start_pos.t1
+    enemy.t2 = start_pos.t2
+    enemy.time_throw = 0
+    enemy.time_before_throw = math.random(enemy.t1,enemy.t2)
   end
   return enemy
 end
@@ -158,13 +164,28 @@ function stoneDestroy (stone)
 end
 
 function stoneThrow (stone)
-  -- stone:setLinearVelocity(0,400)
+
   stone:applyLinearImpulse(20,50,stone.x,stone.y)
 end
 
-function enemyThrow (enemy)
+function enemyThrow (enemy,player)
 
   local stone = stoneCreate(enemy.rect.x,enemy.rect.y)
-  stoneThrow (stone)
+  local t = 2
+  local vx = (player.x-enemy.rect.x)*1.5/t
+  local vy = (player.y-enemy.rect.y)/t+grav*t*t/2
+  local m = enemy.rect.mass
+ stone:setLinearVelocity(vx,vy)
+ -- stone:applyLinearImpulse(vx*m,vy*m,stone.x,stone.y)
   enemy.throw_flag=false
+end
+
+function enemyTimebeforeThrow (enemy)
+  print(enemy.throw_flag,sec,enemy.time_throw,enemy.time_before_throw)
+  if not(enemy.throw_flag) and (sec - enemy.time_throw > enemy.time_before_throw ) then
+
+      enemy.time_throw = sec
+      enemy.time_before_throw = math.random(enemy.t1,enemy.t2)*100
+      enemy.throw_flag = true
+  end
 end

@@ -12,6 +12,7 @@ math.randomseed(os.time())
 local physics = require("physics")
 physics.start()
 -- physics.setGravity(0,0)
+grav =9.8
 require("mapbuild")
 require("animation")
 require("enemies")
@@ -46,13 +47,13 @@ local backgroundImage = {
 makeBackground(backgroundImage,level)
 
 --таймер
-local sec = 0
-level.time = display.newText(sec/1000, display.contentCenterX, 20, native.systemFont, 40 )
+sec = 0
+level.time = display.newText(sec/100, display.contentCenterX, 20, native.systemFont, 40 )
  level.time:setFillColor(math.random(),math.random(),math.random())
  level.time.align = "center"
 local timer_show = function()
   sec = sec + 1
-   level.time.text = sec/1000
+   level.time.text = sec/100
 end
 -- timer.performWithDelay( 1000, timer_show ,-1 )
 
@@ -212,11 +213,11 @@ local jampspeed = 300
 
 
 local function walkplayer ()
-    print(up_flag,right_flag,onGround(player),player.vy )
- --  if not(onGround(player)) then
+    -- print(up_flag,right_flag,onGround(player),player.vy )
+  -- if not(onGround(player)) then
  --      player:applyLinearImpulse(0,0.9,player.x,player.y)
  --  end
- local grav =9.8
+
   if player.vy and player.vy ~=0 then
 
  end
@@ -320,9 +321,12 @@ local function gameLoop ()
       if enemies[i].type==1 then
         enemyWalk (enemies[i])
       end
-      if enemies[i].type==2 and enemies[i].throw_flag then
-        enemyThrow(enemies[i])
+      if enemies[i].type==2 then
+        enemyTimebeforeThrow (enemies[i])
+        if enemies[i].throw_flag then
+        enemyThrow(enemies[i],player)
         print("logging")
+      end
       end
   end
   -- timer.performWithDelay( 1, walkplayer, 1)
