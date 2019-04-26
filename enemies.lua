@@ -1,9 +1,9 @@
-
+local math = require("math")
 --статы мобов
 local enemies_start_pos={
-{x=4,y=15 ,type=1,A=5,B=12}
+{x=6,y=15 ,type=1,A=5,B=12}
 -- ,{x=35,y=13,type=1,A=31,B=42}
-,{x=8,y=12,type=2,t1=2,t2=8}
+,{x=18,y=12,type=2,t1=1,t2=3}
 -- ,{x=23,y=15,type=1,A=20,B=28}
 }
 
@@ -54,7 +54,7 @@ function enemySpawn (start_pos,level)
   enemy.rect.sprite.x=(start_pos.x-0.5)*level.block_size
   enemy.rect.sprite.y=(start_pos.y-0.5)*level.block_size+enemy.y_fix
   enemy.rect.sprite:play()
-  enemy.rect.alpha=1
+  enemy.rect.alpha=0
   physics.addBody(enemy.rect,"dynamic",{density=3.0,bounce = 1,friction =0.0})
   enemy.rect.isFixedRotation = true
   enemy.rect.id = "enemy"
@@ -69,7 +69,7 @@ function enemySpawn (start_pos,level)
     enemy.t1 = start_pos.t1
     enemy.t2 = start_pos.t2
     enemy.time_throw = 0
-    enemy.time_before_throw = math.random(enemy.t1,enemy.t2)
+    enemy.time_before_throw = math.random(enemy.t1,enemy.t2)*100
   end
   return enemy
 end
@@ -152,10 +152,11 @@ function stoneCreate (x,y)
   stone.yScale = scaling
   stone.height = (stone.height-10)*scaling
   stone.width = (stone.width-4)*scaling
-    physics.addBody(stone, "dynamic",{density=3.0})
+    physics.addBody(stone, "dynamic",{radius=15,density=5.0})
     stone.isFixedRotation= true
     stone.x = x
     stone.y= y
+    stone.id="stone"
     return stone
 end
 
@@ -163,25 +164,26 @@ function stoneDestroy (stone)
   display.remove(stone)
 end
 
-function stoneThrow (stone)
 
-  stone:applyLinearImpulse(20,50,stone.x,stone.y)
-end
+function enemyThrow (enemy,player,stones)
 
-function enemyThrow (enemy,player)
+  local stone = stoneCreate(enemy.rect.x,top_y(enemy.rect))
 
-  local stone = stoneCreate(enemy.rect.x,enemy.rect.y)
   local t = 2
-  local vx = (player.x-enemy.rect.x)*1.5/t
-  local vy = (player.y-enemy.rect.y)/t+grav*t*t/2
-  local m = enemy.rect.mass
+  local vxfix =1.3
+  local vyfix = 1.9
+  -- if math.abs(player.x-enemies[i].rect.x)<
+  local vx = (player.x-enemy.rect.x)/t*vxfix
+  local vy = ((player.y-top_y(enemy.rect)*vyfix)/t+grav*t*t/2)
+  -- local m = enemy.rect.mass
  stone:setLinearVelocity(vx,vy)
  -- stone:applyLinearImpulse(vx*m,vy*m,stone.x,stone.y)
   enemy.throw_flag=false
+
 end
 
 function enemyTimebeforeThrow (enemy)
-  print(enemy.throw_flag,sec,enemy.time_throw,enemy.time_before_throw)
+  -- print(enemy.throw_flag,sec,enemy.time_throw,enemy.time_before_throw)
   if not(enemy.throw_flag) and (sec - enemy.time_throw > enemy.time_before_throw ) then
 
       enemy.time_throw = sec

@@ -11,7 +11,7 @@ math.randomseed(os.time())
 
 local physics = require("physics")
 physics.start()
--- physics.setGravity(0,0)
+physics.setGravity(0,9.8)
 grav =9.8
 require("mapbuild")
 require("animation")
@@ -60,6 +60,7 @@ end
 --пресонаж
 
 local player_options = {
+  -- id="player",
   start_x= 100,
   start_y = display.contentCenterY*1.3,
   width =32,
@@ -73,6 +74,7 @@ player.alpha = 0
 camera:add(player, 1)
 physics.addBody(player,"dynamic",{density=3.0,bounce = 0,friction = 1.0})
 player.isFixedRotation = true
+player.id="player"
 
 --золото счетчик
 local gold = {count = 0}
@@ -283,21 +285,44 @@ Runtime:addEventListener("key", keyboardcontrol)
 
 
 local function onLocalCollision( self, event )
-    if event.other.id== "enemy"  then
-      if bott_y(event.target)-10>top_y(event.other) then
-      timer.performWithDelay( 1, player_death ,1 )
-    else
-      -- timer.performWithDelay( 1, enemyKill(event.other) ,1 )
 
-     event.other.sprite:setFillColor(1,0,0,0.3)
-     event.other.id= "none"
-      end
-    end
     --print( event.target.x )        --the first object in the collision
 -- print( event.other.x )
 end
 player.collision = onLocalCollision
 player:addEventListener( "collision" )
+
+local function onGlobalCollision( event )
+  print( event.object1.id )       --the first object in the collision
+print( event.object2.id )
+  if event.object1.id== "enemy" and event.object2.id=="player" then
+    if bott_y(event.object2)-10>top_y(event.object1) then
+    timer.performWithDelay( 1, player_death ,1 )
+    else
+      -- timer.performWithDelay( 1, enemyKill(event.other) ,1 )
+     event.object1.sprite:setFillColor(1,0,0,0.3)
+     event.object1.id= "none"
+      end
+  end
+  --прыжок на монстра
+  if event.object2.id== "enemy" and event.object1.id=="player" then
+    if bott_y(event.object1)-10>top_y(event.object2) then
+    timer.performWithDelay( 1, player_death ,1 )
+    else
+      -- timer.performWithDelay( 1, enemyKill(event.other) ,1 )
+     event.object2.sprite:setFillColor(1,0,0,0.3)
+     event.object2.id= "none"
+      end
+  end
+  if event.object2.id== "stone" and event.object1.id=="player" then
+    timer.performWithDelay( 1, player_death ,1 )
+    timer.performWithDelay( 1, stoneDestroy(event.object2) ,1 )
+  end
+  if event.object1.id~= "player" and event.object1.id~= "enemy"  and event.object2.id=="stone" then
+    timer.performWithDelay( 1, stoneDestroy(event.object2) ,1 )
+  end
+end
+Runtime:addEventListener( "collision", onGlobalCollision )
 
 --проверка в реальном времени
 local function gameLoop ()
@@ -317,15 +342,18 @@ local function gameLoop ()
   --управление спрайтами и передвижением врагов и камнями
 
   for i=1,#enemies do
+    -- print(math.abs(player.x-enemies[i].rect.x)<display.actualContentWidth/1.5)
       enemySpriteOrientation (enemies[i])
       if enemies[i].type==1 then
         enemyWalk (enemies[i])
       end
       if enemies[i].type==2 then
-        enemyTimebeforeThrow (enemies[i])
-        if enemies[i].throw_flag then
-        enemyThrow(enemies[i],player)
-        print("logging")
+        if math.abs(player.x-enemies[i].rect.x)<display.actualContentWidth/1.5 then
+          enemyTimebeforeThrow (enemies[i])
+          if enemies[i].throw_flag then
+          enemyThrow(enemies[i],player)
+          -- print("logging")
+        end
       end
       end
   end

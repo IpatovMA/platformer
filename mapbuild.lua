@@ -79,6 +79,7 @@ function mapbild (level)
         }
         map[i][j].rect.x=j*level.block_size+x
         map[i][j].rect.y=i*level.block_size+y
+        -- map[i][j].rect.id = "block"
         physics.addBody(map[i][j].rect,"static",{bounce = 0,friction = 1.0})
       end
       --голда
