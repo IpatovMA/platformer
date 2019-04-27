@@ -3,7 +3,7 @@ local math = require("math")
 local enemies_start_pos={
 {x=6,y=15 ,type=1,A=5,B=12}
 -- ,{x=35,y=13,type=1,A=31,B=42}
-,{x=18,y=12,type=2,t1=1,t2=3}
+,{x=18,y=12,type=2,t1=6,t2=10}
 -- ,{x=23,y=15,type=1,A=20,B=28}
 }
 
@@ -164,11 +164,18 @@ function stoneDestroy (stone)
   display.remove(stone)
 end
 
+function destroyAllStones (stoneTable)
+  for i , stone in pairs(stoneTable) do
+    stoneDestroy(stone)
+    table.remove(stoneTable,i)
+  end
+end
 
-function enemyThrow (enemy,player,stones)
+function enemyThrow (enemy,player,stoneTable)
 
   local stone = stoneCreate(enemy.rect.x,top_y(enemy.rect))
-
+  table.insert(stoneTable,stone)
+  --хотел сделать все как на уроках физики, но пришлось подкурчивать коэфициенты
   local t = 2
   local vxfix =1.3
   local vyfix = 1.9

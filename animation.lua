@@ -159,11 +159,29 @@ sequences_stoneball= {
 }
 }
 
+buttons_options =
+{
+width = 200,
+height = 200,
+numFrames = 12
+}
+buttons_sheet = graphics.newImageSheet("button.png",buttons_options)
+-- sequences_stoneball= {
+-- {
+--     name = "rotate",
+--     start = 1,
+--     count = 26,
+--     time = 800,
+--     loopCount = 0,
+--     loopDirection = "forward"
+-- }
+-- }
+
 function makeBackground(backgroundImage,level)
-  local scaling = display.actualContentHeight /backgroundImage.height
+  local scaling = display.contentHeight /backgroundImage.height
   for i = 1,math.ceil(level.width*level.block_size/backgroundImage.width/scaling+1) do
     local background = {}
-    background[i] = display.newImageRect( backgroundImage.fileName ,backgroundImage.width*scaling, display.actualContentHeight )
+    background[i] = display.newImageRect( backgroundImage.fileName ,backgroundImage.width*scaling, display.contentHeight )
     background[i].x = backgroundImage.width*scaling*(i-1)
     background[i].y = display.contentCenterY
     -- background[i]:setFillColor(1, 0.49, 0.13, 0.76)

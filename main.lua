@@ -5,6 +5,7 @@
 -----------------------------------------------------------------------------------------
 perspective = require("perspective")
 camera = perspective.createView()
+display.setStatusBar( display.HiddenStatusBar )
 
 local math = require("math")
 math.randomseed(os.time())
@@ -17,9 +18,14 @@ require("mapbuild")
 require("animation")
 require("enemies")
 
+local uiGroop = display.newGroup()
+
+
+
 --массив с врагами
 
- enemies = {}
+ local enemies = {}
+ local stoneTable = {}
 
 --построение карты
 
@@ -27,7 +33,7 @@ require("enemies")
   fileName = 'map.txt',
   block_size=50,
   width = 50,
-  height = 20,
+  height = 25,
 }
 
 level.mapdata = mapread (level)
@@ -78,14 +84,14 @@ player.id="player"
 
 --золото счетчик
 local gold = {count = 0}
-  gold.show = display.newText(gold.count, display.contentCenterX + display.actualContentWidth/2.4, 20, native.systemFont, 40)
+  gold.show = display.newText( gold.count, display.contentCenterX + display.actualContentWidth/2.4, 30, native.systemFont, 40)
   gold.show:setFillColor(1,1,0)
   gold.sprite = display.newSprite( coin_sprite_sheet, sequences_coin )
   gold.sprite:setSequence("shine")
   gold.sprite.yScale = 0.13
   gold.sprite.xScale = 0.13
   gold.sprite.x=display.contentCenterX + display.actualContentWidth/2.2
-  gold.sprite.y=20
+  gold.sprite.y=30
   gold.sprite:play()
 
 --  --спрайт
@@ -202,6 +208,7 @@ function player_death ()
 
     level.map,enemies = rebuildmap(level)
      enemies = spawnthemall(level) --массив врагов
+  destroyAllStones(stoneTable)
 end
 
 --управение
@@ -220,9 +227,9 @@ local function walkplayer ()
  --      player:applyLinearImpulse(0,0.9,player.x,player.y)
  --  end
 
-  if player.vy and player.vy ~=0 then
-
- end
+ --  if player.vy and player.vy ~=0 then
+ --
+ -- end
  if (right_flag) then
    if not(onGround(player)) then
      local vy = player.vy
@@ -293,8 +300,8 @@ player.collision = onLocalCollision
 player:addEventListener( "collision" )
 
 local function onGlobalCollision( event )
-  print( event.object1.id )       --the first object in the collision
-print( event.object2.id )
+--   print( event.object1.id )       --the first object in the collision
+-- print( event.object2.id )
   if event.object1.id== "enemy" and event.object2.id=="player" then
     if bott_y(event.object2)-10>top_y(event.object1) then
     timer.performWithDelay( 1, player_death ,1 )
@@ -314,16 +321,71 @@ print( event.object2.id )
      event.object2.id= "none"
       end
   end
+  --камень попадает в игрока
   if event.object2.id== "stone" and event.object1.id=="player" then
     timer.performWithDelay( 1, player_death ,1 )
     timer.performWithDelay( 1, stoneDestroy(event.object2) ,1 )
   end
+  -- камень падает на землю
   if event.object1.id~= "player" and event.object1.id~= "enemy"  and event.object2.id=="stone" then
     timer.performWithDelay( 1, stoneDestroy(event.object2) ,1 )
   end
 end
 Runtime:addEventListener( "collision", onGlobalCollision )
 
+
+--управление
+local Ui = {}
+local button_size = 180
+for i =1, 6 do
+  Ui[i]= display.newImageRect(buttons_sheet, i , button_size, button_size)
+  Ui[i].x=display.contentCenterX+Ui[i].width*((i-1)%3 - 1)
+  Ui[i].y=display.contentCenterY*2.1-Ui[i].height + Ui[i].height*math.floor((i-1)/3)
+  Ui[i].alpha = 0.7
+  Ui[i].id=i
+end
+
+local function touchUi(event)
+  print(left_flag,up_flag,right_flag)
+  -- print(event.x,event.y)
+  for i=1,6 do
+    if event.x>left_x(Ui[i]) and event.x<right_x(Ui[i]) and event.y>top_y(Ui[i]) and event.y<bott_y(Ui[i]) then
+      print(i)
+      if i == 1 then
+        left_flag = true
+        up_flag = true
+      else
+        left_flag = false
+            up_flag = false
+        end
+      if i == 2 then
+        up_flag = true
+      else
+        up_flag = false
+      end
+      if i == 3 then
+        right_flag = true
+        up_flag = true
+      else  right_flag = false
+            up_flag = false
+        end
+      if i == 4 then
+      left_flag = true
+      else  left_flag = false
+      end
+      if i == 5 then
+        --пока пусто
+        else  --и тут
+      end
+      if i == 6 then
+      right_flag = true
+    else  right_flag = false
+      end
+    end
+  end
+end
+
+Runtime:addEventListener( "touch", touchUi )
 --проверка в реальном времени
 local function gameLoop ()
 
@@ -341,6 +403,8 @@ local function gameLoop ()
   spriteOritentation(player_sprite)
   --управление спрайтами и передвижением врагов и камнями
 
+-- print(button1:onPress())
+
   for i=1,#enemies do
     -- print(math.abs(player.x-enemies[i].rect.x)<display.actualContentWidth/1.5)
       enemySpriteOrientation (enemies[i])
@@ -348,10 +412,10 @@ local function gameLoop ()
         enemyWalk (enemies[i])
       end
       if enemies[i].type==2 then
-        if math.abs(player.x-enemies[i].rect.x)<display.actualContentWidth/1.5 then
+        if math.abs(player.x-enemies[i].rect.x)<display.actualContentWidth then
           enemyTimebeforeThrow (enemies[i])
           if enemies[i].throw_flag then
-          enemyThrow(enemies[i],player)
+          enemyThrow(enemies[i],player,stoneTable)
           -- print("logging")
         end
       end
