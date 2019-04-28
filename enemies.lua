@@ -1,9 +1,9 @@
 local math = require("math")
 --статы мобов
 local enemies_start_pos={
-{x=6,y=15 ,type=1,A=5,B=12}
+{x=8,y=12 ,type=1,A=5,B=12}
 -- ,{x=35,y=13,type=1,A=31,B=42}
-,{x=18,y=12,type=2,t1=6,t2=10}
+,{x=25,y=12,type=2,t1=6,t2=10}
 -- ,{x=23,y=15,type=1,A=20,B=28}
 }
 
@@ -48,7 +48,6 @@ function enemySpawn (start_pos,level)
   enemy.scaling=enemy.height/enemy.sprite_options.height*enemy.scaling_fix
   enemy.rect = display.newRect((start_pos.x-0.5)*level.block_size,(start_pos.y-0.5)*level.block_size,enemy.width,enemy.height)
   enemy.rect.sprite= display.newSprite(enemy.sprite_sheet, enemy.sequence)
---  enemy.sprite:setSequence("walk")
   enemy.rect.sprite.yScale = enemy.scaling
   enemy.rect.sprite.xScale = enemy.scaling
   enemy.rect.sprite.x=(start_pos.x-0.5)*level.block_size
@@ -179,18 +178,14 @@ function enemyThrow (enemy,player,stoneTable)
   local t = 2
   local vxfix =1.3
   local vyfix = 1.9
-  -- if math.abs(player.x-enemies[i].rect.x)<
   local vx = (player.x-enemy.rect.x)/t*vxfix
   local vy = ((player.y-top_y(enemy.rect)*vyfix)/t+grav*t*t/2)
-  -- local m = enemy.rect.mass
  stone:setLinearVelocity(vx,vy)
- -- stone:applyLinearImpulse(vx*m,vy*m,stone.x,stone.y)
   enemy.throw_flag=false
 
 end
 
 function enemyTimebeforeThrow (enemy)
-  -- print(enemy.throw_flag,sec,enemy.time_throw,enemy.time_before_throw)
   if not(enemy.throw_flag) and (sec - enemy.time_throw > enemy.time_before_throw ) then
 
       enemy.time_throw = sec

@@ -21,17 +21,13 @@ bott_y = function (obj)
   local y = obj.y + obj.height/2
   return y
 end
---сетка
--- for i=0,25 do
---   local x = display.newRect(i*50,display.contentCenterY,5,display.actualContentHeight)
---   camera:add(x,1)
---   x:setFillColor(0,0,1)
--- end
--- for i=0,display.actualContentHeight/50 do
---   local x = display.newRect(display.contentCenterX,i*50,5000,5)
---     camera:add(x,1)
---     x:setFillColor(0,0,1)
--- end
+--что то находится на чем то другом?
+inarea = function(self,area)
+  if self.x>left_x(area) and self.x<right_x(area) and self.y>top_y(area) and self.y<bott_y(area) then
+    return true
+  else return false
+  end
+end
 
 --построение карты
 function mapread (level)
@@ -58,6 +54,7 @@ function mapbild (level)
     local y = -level.block_size/2
     local coinScaling = level.block_size/coin_sprite_options.height*0.9
     local lavaScaling = level.block_size/lava_sprite_options.height
+    local doorScaling = level.block_size*2/door_sprite_options.height
 
     local map = {}
   for i=1,level.height do
@@ -85,7 +82,6 @@ function mapbild (level)
       --голда
       if level.mapdata[i][j] == "G" then
           map[i][j] = {
-            --rect=display.newRect(j*level.block_size+x,i*level.block_size+y,level.block_size,level.block_size),
             rect  = display.newSprite( coin_sprite_sheet, sequences_coin ),
             id = "gold"
           }
@@ -100,7 +96,7 @@ function mapbild (level)
       --лава
       if level.mapdata[i][j] == "L" then
         map[i][j] = {
-        --  rect=display.newRect(j*level.block_size+x,i*level.block_size+y,level.block_size,level.block_size),
+
           rect  = display.newSprite( lava_sprite_sheet, sequences_lava),
           id = "lava"
         }
@@ -110,9 +106,32 @@ function mapbild (level)
         map[i][j].rect.x=j*level.block_size+x
         map[i][j].rect.y=i*level.block_size+y
         map[i][j].rect:play()
-        --physics.addBody(map[i][j].rect,"static",{bounce = 0,friction = 1.0})
-      end
 
+      end
+      --дверь
+      if level.mapdata[i][j] == "D" then
+        map[i][j] = {
+          rect  = display.newSprite(door_sprite_sheet, sequences_door),
+          id = "door"
+        }
+        map[i][j].rect:setSequence("open")
+        map[i][j].rect.yScale = doorScaling
+        map[i][j].rect.xScale = doorScaling*1.1
+        -- local yfix = bl
+        map[i][j].rect.x=j*level.block_size+x
+        map[i][j].rect.y=(i-0.5)*level.block_size+y
+        -- map[i][j].rect:play()
+
+      end
+      --ключ
+      if level.mapdata[i][j] == "K" then
+          map[i][j] = {
+            rect  = display.newImageRect( "key.png",level.block_size,level.block_size),
+            id = "key"
+          }
+          map[i][j].rect.x=j*level.block_size+x
+          map[i][j].rect.y=i*level.block_size+y
+    end
       camera:add(map[i][j].rect,1)
     end
   end
@@ -123,7 +142,7 @@ function mapbild (level)
     bott =display.newRect(level.width*level.block_size/2,level.height*level.block_size,level.width*level.block_size,10),
   }
   for side, rect in pairs(border)do
-    physics.addBody(border[side],"static")
+    physics.addBody(border[side],"static",{friction = 0.0})
     border[side].alpha = 0
     camera:add(border[side],1)
   end
@@ -141,6 +160,10 @@ function rebuildmap (level)
       level.map[i][j].id = "gold"
        level.map[i][j].rect.alpha = 1
        end
+       if level.mapdata[i][j] == "K" and level.map[i][j].id ~="key" then
+       level.map[i][j].id = "key"
+        level.map[i][j].rect.alpha = 1
+        end
 
     end
     end
@@ -148,3 +171,14 @@ function rebuildmap (level)
 
     return level.map
     end
+    -- --сетка
+    -- for i=0,25 do
+    --   local x = display.newRect(i*50,display.contentCenterY,5,display.actualContentHeight)
+    --   camera:add(x,1)
+    --   x:setFillColor(0,0,1)
+    -- end
+    -- for i=0,display.actualContentHeight/50 do
+    --   local x = display.newRect(display.contentCenterX,i*50,5000,5)
+    --     camera:add(x,1)
+    --     x:setFillColor(0,0,1)
+    -- end

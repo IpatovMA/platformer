@@ -6,6 +6,7 @@
 perspective = require("perspective")
 camera = perspective.createView()
 display.setStatusBar( display.HiddenStatusBar )
+system.activate( "multitouch" )
 
 local math = require("math")
 math.randomseed(os.time())
@@ -61,7 +62,6 @@ local timer_show = function()
   sec = sec + 1
    level.time.text = sec/100
 end
--- timer.performWithDelay( 1000, timer_show ,-1 )
 
 --пресонаж
 
@@ -72,7 +72,8 @@ local player_options = {
   width =32,
   height = 64,
   vx=0,
-  vy=0
+  vy=0,
+  key_flag = false
 }
 
 local player = display.newRect(player_options.start_x,player_options.start_y,player_options.width,player_options.height)
@@ -94,10 +95,18 @@ local gold = {count = 0}
   gold.sprite.y=30
   gold.sprite:play()
 
---  --спрайт
--- local player_sprite = display.newSprite(player_sprite_sheet, sequences_player )
-  --local spriteScale = player_options.height/(player_sprite_options.height-3)
+--индикатор ключа
+local keypic = display.newImageRect( "key.png",level.block_size*0.7,level.block_size*0.7)
+keypic.x=display.contentCenterX + display.actualContentWidth/2.2
+keypic.y=80
+function keyShow (flag)
+  if flag then
+    keypic.alpha = 1
+  else keypic.alpha = 0
+  end
+end
 
+--  --спрайт
 local player_sprite = display.newSprite( knight_sprite_sheet, sequences_knight )
   local spriteScale =player_options.height/(50)
   local knight_yfix=-3
@@ -166,7 +175,7 @@ local function inLava (obj)
   return false
 end
 
-local function catchGold (obj)
+local function catchItem (obj)
   for i = math.ceil((top_y(obj)-1)/level.block_size),math.ceil((bott_y(obj)+1)/level.block_size) do
     for j=(math.ceil((left_x(obj)-1)/level.block_size)),(math.ceil((right_x(obj)+1)/level.block_size)) do
      if level.map[i][j].id=="gold" then
@@ -175,24 +184,16 @@ local function catchGold (obj)
        gold.count=gold.count+1
        gold.show.text=gold.count
      end
+     if level.map[i][j].id=="key" then
+       level.map[i][j].id="air"
+       level.map[i][j].rect.alpha = 0
+       player.key_flag = true
+     end
     end
   end
   return false
 end
 
--- local function touchEnemy (obj)
---   for i = math.ceil((top_y(obj)-1)/level.block_size),math.ceil((bott_y(obj)+1)/level.block_size) do
---     for j=(math.ceil((left_x(obj)-1)/level.block_size)),(math.ceil((right_x(obj)+1)/level.block_size)) do
---      if level.map[i][j].id=="gold" then
---        level.map[i][j].id="air"
---        level.map[i][j].rect.alpha = 0
---        gold.count=gold.count+1
---        gold.show.text=gold.count
---      end
---     end
---   end
---   return false
--- end
 
 
 --смерть персонажа, перезагрузка уровня
@@ -203,6 +204,7 @@ function player_death ()
   sec=0
   gold.count=0
   gold.show.text=gold.count
+  player.key_flag = false
 
   killallenemies (enemies)
 
@@ -267,7 +269,7 @@ local function walkplayer ()
   --     player:setLinearVelocity(0)
   --  end
 end
-
+--управеление с клавиатруы
 local function keyboardcontrol(event)
  if (event.keyName == 'd' and event.phase == 'down') then
    right_flag=true
@@ -288,20 +290,10 @@ local function keyboardcontrol(event)
 end
 
 Runtime:addEventListener("key", keyboardcontrol)
--- Runtime:addEventListener( "enterFrame", walkplayer )
-
-
-local function onLocalCollision( self, event )
-
-    --print( event.target.x )        --the first object in the collision
--- print( event.other.x )
-end
-player.collision = onLocalCollision
-player:addEventListener( "collision" )
 
 local function onGlobalCollision( event )
---   print( event.object1.id )       --the first object in the collision
--- print( event.object2.id )
+    --   print( event.object1.id )       --the first object in the collision
+      -- print( event.object2.id )
   if event.object1.id== "enemy" and event.object2.id=="player" then
     if bott_y(event.object2)-10>top_y(event.object1) then
     timer.performWithDelay( 1, player_death ,1 )
@@ -334,7 +326,7 @@ end
 Runtime:addEventListener( "collision", onGlobalCollision )
 
 
---управление
+--управление на экране
 local Ui = {}
 local button_size = 180
 for i =1, 6 do
@@ -349,64 +341,58 @@ local function touchUi(event)
   print(left_flag,up_flag,right_flag)
   -- print(event.x,event.y)
   for i=1,6 do
-    if event.x>left_x(Ui[i]) and event.x<right_x(Ui[i]) and event.y>top_y(Ui[i]) and event.y<bott_y(Ui[i]) then
-      print(i)
-      if i == 1 then
+    -- if event.x>left_x(Ui[i]) and event.x<right_x(Ui[i]) and event.y>top_y(Ui[i]) and event.y<bott_y(Ui[i]) then
+    if inarea(event,Ui[i]) then
+      -- print(i)
+      if i <=3 and (event.phase == "began" or event.phase == "moved")then
+        up_flag = true
+      else
+          up_flag = false
+        end
+      if (i == 1 or i==4) and (event.phase == "began" or event.phase == "moved")then
         left_flag = true
-        up_flag = true
       else
-        left_flag = false
-            up_flag = false
-        end
-      if i == 2 then
-        up_flag = true
-      else
-        up_flag = false
+          left_flag = false
       end
-      if i == 3 then
+      if (i == 3 or i == 6)and (event.phase == "began" or event.phase == "moved") then
         right_flag = true
-        up_flag = true
-      else  right_flag = false
-            up_flag = false
+        else
+          right_flag = false
         end
-      if i == 4 then
-      left_flag = true
-      else  left_flag = false
-      end
       if i == 5 then
         --пока пусто
         else  --и тут
       end
-      if i == 6 then
-      right_flag = true
-    else  right_flag = false
-      end
-    end
+    Ui[i]:setFillColor(0.93, 0.56, 0.56, 0.5)
+  else
+    Ui[i]:setFillColor(1,1,1)
+  end
+  if event.phase == "ended" or event.phase == "canceled" then
+        Ui[i]:setFillColor(1,1,1)
+  end
   end
 end
 
 Runtime:addEventListener( "touch", touchUi )
---проверка в реальном времени
+--проверка в реальном времени.
 local function gameLoop ()
 
   --таймер
   timer_show()
+  --отображение индикатора ключа
+  keyShow(player.key_flag)
   --упал в лаву?
   if inLava(player) then
     player_death()
   end
-  --взял монету?
-  catchGold(player)
+  --взял монету или ключ?
+  catchItem(player)
   --скорость персонажа
   player.vx,player.vy = player:getLinearVelocity()
   --управление спрайтом персонажа
   spriteOritentation(player_sprite)
   --управление спрайтами и передвижением врагов и камнями
-
--- print(button1:onPress())
-
   for i=1,#enemies do
-    -- print(math.abs(player.x-enemies[i].rect.x)<display.actualContentWidth/1.5)
       enemySpriteOrientation (enemies[i])
       if enemies[i].type==1 then
         enemyWalk (enemies[i])
@@ -416,20 +402,19 @@ local function gameLoop ()
           enemyTimebeforeThrow (enemies[i])
           if enemies[i].throw_flag then
           enemyThrow(enemies[i],player,stoneTable)
-          -- print("logging")
+
         end
       end
       end
   end
-  -- timer.performWithDelay( 1, walkplayer, 1)
+
 walkplayer()
-  -- enemyWalk (enemies[2])
+
   --упал в пустоту?
   if bott_y(player)>=(level.height-0.2)*level.block_size then
     player_death()
   end
-  -- print(up_flag,right_flag,onGround(player))
+
 end
 
--- Runtime:addEventListener( "enterFrame", gameLoop )
 gameLoopTimer = timer.performWithDelay( 1, gameLoop, 0 )
