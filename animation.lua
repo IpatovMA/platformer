@@ -202,3 +202,6 @@ function makeMoreAlpha (obj)
   obj.alpha = obj.alpha - 0.1
 
 end
+-- function removedisplayobj (obj)
+--
+-- end

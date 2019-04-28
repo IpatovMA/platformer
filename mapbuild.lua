@@ -28,6 +28,10 @@ inarea = function(self,area)
   else return false
   end
 end
+-- --время между двумя собыитями 
+-- function timebetween (event1,event2,sec)
+--   local sec1 = sec
+-- end
 
 --построение карты
 function mapread (level)

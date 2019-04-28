@@ -19,7 +19,7 @@ require("mapbuild")
 require("animation")
 require("enemies")
 
-local uiGroop = display.newGroup()
+-- startGameLoop()--старт отсчета игрового вермени
 
 --массив с врагами
 
@@ -192,221 +192,222 @@ local function catchItem (obj)
   return false
 end
 
+  --действие -открытие двери-
+   -- кнопка перезагразки после прохождения
+    local  relaunchButton = display.newText("relaunch", display.contentCenterX, display.contentCenterY+150, native.systemFont, 80)
+    relaunchButton.alpha = 0
+    local relaunch_flag = false
+     local stext= "locked"
+    local screentext = display.newText(stext, display.contentCenterX, display.contentCenterY, native.systemFont, 150 )
+        screentext.alpha = 0
+  local function action (player)
 
 
---смерть персонажа, перезагрузка уровня
-function player_death ()
-  player.x = player_options.start_x
-  player.y = player_options.start_y
-  player:setLinearVelocity(0)
-  sec=0
-  gold.count=0
-  gold.show.text=gold.count
-  player.key_flag = false
-
-  killallenemies (enemies)
-
-    level.map,enemies = rebuildmap(level)
-     enemies = spawnthemall(level) --массив врагов
-  destroyAllStones(stoneTable)
-end
-
-
-
---действие -открытие двери-
-local function action (player)
-  print(not(level.map.door.open))
-  local screentext = display.newText("locked", display.contentCenterX, display.contentCenterY, native.systemFont, 150 )
-  screentext:setFillColor(0.32, 0.01, 0.01)
-  screentext.alpha = 0
-  local textdisappear = function()
-    makeMoreAlpha(screentext)
-  end
-  local playerdisappear = function()
-    makeMoreAlpha(player.sprite)
-  end
-  if inarea(player,level.map.door)then
-    if not(level.map.door.open) and player.key_flag  then
-      -- if player.key_flag  then
-      print("open")
-        level.map.door:play()
-        level.map.door.open = true
-      elseif not(level.map.door.open) then
-        print("close")
-          screentext.alpha = 1
-        timer.performWithDelay( 100, textdisappear,10)
-    else
-      print("complete")
-      screentext.text = "complete"
-        screentext:setFillColor(0.63, 0.94, 0.77)
-      screentext.alpha = 1
-      timer.performWithDelay( 50, playerdisappear,10)
-      timer.pause(gameLoopTimer)
+    local textdisappear = function()
+      makeMoreAlpha(screentext)
     end
+    local textremove = function()
+      display.remove(obj)
+    end
+    local playerdisappear = function()
+      makeMoreAlpha(player.sprite)
+    end
+    local relaunchTrue = function()
+      relaunch_flag = true
+      relaunchButton.alpha = 1
+    end
+    if inarea(player,level.map.door)then
 
+      if not(level.map.door.open) and player.key_flag  then
+          level.map.door:play()
+          level.map.door.open = true
+        elseif not(level.map.door.open) then
+          text = "locked"
+              screentext:setFillColor(0.32, 0.01, 0.01)
+          screentext.text = text
+            screentext.alpha = 1
+          timer.performWithDelay( 100, textdisappear,10)
+          timer.performWithDelay( 1000, textremove,1)
+      else
+        text = "complete"
+        screentext.text = text
+          screentext:setFillColor(0.63, 0.94, 0.77)
+        screentext.alpha = 1
+        timer.performWithDelay( 50, playerdisappear,10)
+          timer.performWithDelay( 500, relaunchTrue,1)
+        timer.pause(gameLoopTimer)
+        --реалунчь тру ушел в плеер дисапиар
+      end
+    end
   end
-end
--- timer.performWithDelay( 1, makeMoreAlpha(level.map.door),0)
+
 --управение
 local up_flag = false
-local down_flag = false
-local left_flag = false
-local right_flag = false
+  local down_flag = false
+  local left_flag = false
+  local right_flag = false
 
-local walkspeed = 200
-local jampspeed = 300
+  local walkspeed = 200
+  local jampspeed = 250
 
 
-local function walkplayer ()
-    -- print(up_flag,right_flag,onGround(player),player.vy )
-  -- if not(onGround(player)) then
- --      player:applyLinearImpulse(0,0.9,player.x,player.y)
- --  end
+  local function walkplayer ()
+      -- print(up_flag,right_flag,onGround(player),player.vy )
+    -- if not(onGround(player)) then
+   --      player:applyLinearImpulse(0,0.9,player.x,player.y)
+   --  end
 
- --  if player.vy and player.vy ~=0 then
- --
- -- end
- if (right_flag) then
-   if not(onGround(player)) then
-     local vy = player.vy
+   --  if player.vy and player.vy ~=0 then
+   --
+   -- end
+   if (right_flag) then
+     if not(onGround(player)) then
+       local vy = player.vy
 
-     player:setLinearVelocity(walkspeed/1.3, vy-0.0001*grav)
-   else player:setLinearVelocity(walkspeed, player.vy )
+       player:setLinearVelocity(walkspeed/1.3, vy-0.0001*grav)
+     else player:setLinearVelocity(walkspeed, player.vy )
+     end
    end
- end
- if (left_flag) then
-   if not(onGround(player)) then
-     local vy = player.vy
+   if (left_flag) then
+     if not(onGround(player)) then
+       local vy = player.vy
 
-     player:setLinearVelocity(-walkspeed/1.3,vy-0.0001*grav )
-   else player:setLinearVelocity(-walkspeed, player.vy )end
- end
- if up_flag and (onGround(player)) then
-  player:setLinearVelocity(player.vx/1.3, -jampspeed )
- end
- if (down_flag) then
-   player_death ()
- end
+       player:setLinearVelocity(-walkspeed/1.3,vy-0.0001*grav )
+     else player:setLinearVelocity(-walkspeed, player.vy )end
+   end
+   if up_flag and (onGround(player)) then
+    player:setLinearVelocity(player.vx/1.3, -jampspeed )
+   end
+   if (down_flag) then
+     relaunch_level ()
+   end
 
 
-  -- --убираем скольжение
-  --  if not(left_flag) and player.vx and player.vx<0 and (onGround(player)) then
-  --    player:setLinearVelocity(0,player.vy)
-  --    print("(l)")
-  --  end
-  --  if not(right_flag) and player.vx and player.vx>0 and (onGround(player)) then
-  --    player:setLinearVelocity(0,player.vy)
-  --    print("(r)")
-  --  end
-  --  print((right_flag))
-  --  if not(right_flag) and not(left_flag) and not(up_flag) then
-  --     player:setLinearVelocity(0)
-  --  end
-end
---управеление с клавиатруы
-local function keyboardcontrol(event)
- if (event.keyName == 'd' and event.phase == 'down') then
-   right_flag=true
- else right_flag=false
- end
- if (event.keyName == 'a' and event.phase == 'down') then
-   left_flag=true
- else left_flag=false
- end
- if (event.keyName == 'w' and event.phase == 'down') then
-   up_flag=true
- else up_flag=false
- end
- if (event.keyName == 's' and event.phase == 'down') then
-   down_flag=true
- else down_flag=false
- end
- if (event.keyName == 'f' and event.phase == 'down') then
-   action(player)
- end
-end
-
-Runtime:addEventListener("key", keyboardcontrol)
-
-local function onGlobalCollision( event )
-    --   print( event.object1.id )       --the first object in the collision
-      -- print( event.object2.id )
-  if event.object1.id== "enemy" and event.object2.id=="player" then
-    if bott_y(event.object2)-10>top_y(event.object1) then
-    timer.performWithDelay( 1, player_death ,1 )
-    else
-      -- timer.performWithDelay( 1, enemyKill(event.other) ,1 )
-     event.object1.sprite:setFillColor(1,0,0,0.3)
-     event.object1.id= "none"
-      end
+    -- --убираем скольжение
+    --  if not(left_flag) and player.vx and player.vx<0 and (onGround(player)) then
+    --    player:setLinearVelocity(0,player.vy)
+    --    print("(l)")
+    --  end
+    --  if not(right_flag) and player.vx and player.vx>0 and (onGround(player)) then
+    --    player:setLinearVelocity(0,player.vy)
+    --    print("(r)")
+    --  end
+    --  print((right_flag))
+    --  if not(right_flag) and not(left_flag) and not(up_flag) then
+    --     player:setLinearVelocity(0)
+    --  end
   end
-  --прыжок на монстра
-  if event.object2.id== "enemy" and event.object1.id=="player" then
-    if bott_y(event.object1)-10>top_y(event.object2) then
-    timer.performWithDelay( 1, player_death ,1 )
-    else
-      -- timer.performWithDelay( 1, enemyKill(event.other) ,1 )
-     event.object2.sprite:setFillColor(1,0,0,0.3)
-     event.object2.id= "none"
-      end
+  --управеление с клавиатруы
+  local function keyboardcontrol(event)
+   if (event.keyName == 'd' and event.phase == 'down') then
+     right_flag=true
+   else right_flag=false
+   end
+   if (event.keyName == 'a' and event.phase == 'down') then
+     left_flag=true
+   else left_flag=false
+   end
+   if (event.keyName == 'w' and event.phase == 'down') then
+     up_flag=true
+   else up_flag=false
+   end
+   if (event.keyName == 's' and event.phase == 'down') then
+     down_flag=true
+   else down_flag=false
+   end
+   if (event.keyName == 'f' and event.phase == 'down') then
+     action(player)
+   end
   end
-  --камень попадает в игрока
-  if event.object2.id== "stone" and event.object1.id=="player" then
-    timer.performWithDelay( 1, player_death ,1 )
-    timer.performWithDelay( 1, stoneDestroy(event.object2) ,1 )
-  end
-  -- камень падает на землю
-  if event.object1.id~= "player" and event.object1.id~= "enemy"  and event.object2.id=="stone" then
-    timer.performWithDelay( 1, stoneDestroy(event.object2) ,1 )
-  end
-end
-Runtime:addEventListener( "collision", onGlobalCollision )
 
+  Runtime:addEventListener("key", keyboardcontrol)
 
---управление на экране
-local Ui = {}
-local button_size = 180
-for i =1, 6 do
-  Ui[i]= display.newImageRect(buttons_sheet, i , button_size, button_size)
-  Ui[i].x=display.contentCenterX+Ui[i].width*((i-1)%3 - 1)
-  Ui[i].y=display.contentCenterY*2.1-Ui[i].height + Ui[i].height*math.floor((i-1)/3)
-  Ui[i].alpha = 0.7
-  Ui[i].id=i
-end
-
-local function touchUi(event)
-
-  for i=1,6 do
-    if inarea(event,Ui[i]) then
-      if i <=3 and (event.phase == "began" or event.phase == "moved")then
-        up_flag = true
+  local function onGlobalCollision( event )
+      --   print( event.object1.id )       --the first object in the collision
+        -- print( event.object2.id )
+    if event.object1.id== "enemy" and event.object2.id=="player" then
+      if bott_y(event.object2)-10>top_y(event.object1) then
+      timer.performWithDelay( 1, relaunch_level ,1 )
       else
-          up_flag = false
+        -- timer.performWithDelay( 1, enemyKill(event.other) ,1 )
+       event.object1.sprite:setFillColor(1,0,0,0.3)
+       event.object1.id= "none"
         end
-      if (i == 1 or i==4) and (event.phase == "began" or event.phase == "moved")then
-        left_flag = true
+    end
+    --прыжок на монстра
+    if event.object2.id== "enemy" and event.object1.id=="player" then
+      if bott_y(event.object1)-10>top_y(event.object2) then
+      timer.performWithDelay( 1, relaunch_level ,1 )
       else
-          left_flag = false
-      end
-      if (i == 3 or i == 6)and (event.phase == "began" or event.phase == "moved") then
-        right_flag = true
+        -- timer.performWithDelay( 1, enemyKill(event.other) ,1 )
+       event.object2.sprite:setFillColor(1,0,0,0.3)
+       event.object2.id= "none"
+        end
+    end
+    --камень попадает в игрока
+    if event.object2.id== "stone" and event.object1.id=="player" then
+      timer.performWithDelay( 1, relaunch_level ,1 )
+      timer.performWithDelay( 1, stoneDestroy(event.object2) ,1 )
+    end
+    -- камень падает на землю
+    if event.object1.id~= "player" and event.object1.id~= "enemy"  and event.object2.id=="stone" then
+      timer.performWithDelay( 1, stoneDestroy(event.object2) ,1 )
+    end
+  end
+  Runtime:addEventListener( "collision", onGlobalCollision )
+
+  --управление на экране
+  local Ui = {}
+
+  local button_size = 180
+  for i =1, 6 do
+    Ui[i]= display.newImageRect(buttons_sheet, i , button_size, button_size)
+    Ui[i].x=display.contentCenterX+Ui[i].width*((i-1)%3 - 1)
+    Ui[i].y=display.contentCenterY*2.1-Ui[i].height + Ui[i].height*math.floor((i-1)/3)
+    Ui[i].alpha = 0.7
+    Ui[i].id=i
+  end
+
+  local function touchUi(event)
+
+    for i=1,6 do
+      if inarea(event,Ui[i]) then
+        if i <=3 and (event.phase == "began" or event.phase == "moved")then
+          up_flag = true
         else
-          right_flag = false
+            up_flag = false
+          end
+        if (i == 1 or i==4) and (event.phase == "began" or event.phase == "moved")then
+          left_flag = true
+        else
+            left_flag = false
         end
-      if i == 5 then
-           action(player)
-      end
-    Ui[i]:setFillColor(0.93, 0.56, 0.56, 0.5)
-  else
-    Ui[i]:setFillColor(1,1,1)
-  end
-  if event.phase == "ended" or event.phase == "canceled" then
+        if (i == 3 or i == 6)and (event.phase == "began" or event.phase == "moved") then
+          right_flag = true
+          else
+            right_flag = false
+          end
+        if i == 5 then
+             action(player)
+        end
+      Ui[i]:setFillColor(0.93, 0.56, 0.56, 0.5)
+      else
         Ui[i]:setFillColor(1,1,1)
-  end
-  end
-end
+      end
+      if event.phase == "ended" or event.phase == "canceled" then
+            Ui[i]:setFillColor(1,1,1)
+      end
+    end
 
+
+    if  relaunch_flag and inarea(event,relaunchButton) then
+      relaunch_level()
+    end
+  end
 Runtime:addEventListener( "touch", touchUi )
+
+
+
 --проверка в реальном времени.
 local function gameLoop ()
   -- print(map.door.id)
@@ -416,7 +417,7 @@ local function gameLoop ()
   keyShow(player.key_flag)
   --упал в лаву?
   if inLava(player) then
-    player_death()
+    relaunch_level()
   end
   --взял монету или ключ?
   catchItem(player)
@@ -441,13 +442,37 @@ local function gameLoop ()
       end
   end
 
-walkplayer()
-
---упал в пустоту?
-if bott_y(player)>=(level.height-0.2)*level.block_size then
-    player_death()
+  if not(relaunch_flag) and relaunchButton.alpha == 1 then
+    relaunchButton.alpha = 0
   end
+
+  walkplayer()
+
+  --упал в пустоту?
+  if bott_y(player)>=(level.height-0.2)*level.block_size then
+      relaunch_level()
+    end
 
 end
 
-gameLoopTimer = timer.performWithDelay( 1, gameLoop, 0 )
+  gameLoopTimer = timer.performWithDelay( 1, gameLoop, 0 )
+
+--смерть персонажа, перезагрузка уровня
+function relaunch_level ()
+  player.x = player_options.start_x
+  player.y = player_options.start_y
+  player:setLinearVelocity(0)
+  player.sprite.alpha = 1
+  sec=0
+  gold.count=0
+  gold.show.text=gold.count
+  player.key_flag = false
+  relaunch_flag= false
+  screentext.alpha = 0
+  killallenemies (enemies)
+
+    level.map,enemies = rebuildmap(level)
+     enemies = spawnthemall(level) --массив врагов
+  destroyAllStones(stoneTable)
+  timer.resume( gameLoopTimer )
+end
