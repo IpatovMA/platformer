@@ -28,7 +28,7 @@ inarea = function(self,area)
   else return false
   end
 end
--- --время между двумя собыитями 
+-- --время между двумя собыитями
 -- function timebetween (event1,event2,sec)
 --   local sec1 = sec
 -- end
@@ -60,7 +60,7 @@ function mapbild (level)
     local lavaScaling = level.block_size/lava_sprite_options.height
     local doorScaling = level.block_size*2/door_sprite_options.height
 
-
+    local player = {}
     local map = {}
   for i=1,level.height do
     map[i] = {}
@@ -124,10 +124,9 @@ function mapbild (level)
         map.door:setSequence("open")
         map.door.yScale = doorScaling
         map.door.xScale = doorScaling*1.1
-        -- local yfix = bl
         map.door.x=j*level.block_size+x
         map.door.y=(i-0.5)*level.block_size+y
-        -- map[i][j].rect:play()
+          camera:add(map.door,1)
       end
       --ключ
       if level.mapdata[i][j] == "K" then
@@ -138,10 +137,21 @@ function mapbild (level)
           map[i][j].rect.x=j*level.block_size+x
           map[i][j].rect.y=i*level.block_size+y
     end
+    --игрок
+    if level.mapdata[i][j] == "P" then
+      map[i][j] = {
+        rect=display.newRect(j*level.block_size+x,i*level.block_size+y,level.block_size,level.block_size),
+        id = "air"
+      }
+      map[i][j].rect.alpha = 0
+      player.x = map[i][j].rect.x
+      player.y = top_y(map[i][j].rect)
+    end
       camera:add(map[i][j].rect,1)
     end
+
   end
-  camera:add(map.door,1)
+
   local border = {
     left =display.newRect(1,level.height*level.block_size/2,10,level.height*level.block_size),
     top =display.newRect(level.width*level.block_size/2,1,level.width*level.block_size,10),
@@ -155,7 +165,7 @@ function mapbild (level)
   end
 
 
-  return map,border
+  return map,border,player.x,player.y
 end
 
 function rebuildmap (level)
@@ -171,7 +181,7 @@ function rebuildmap (level)
      level.map[i][j].id = "key"
       level.map[i][j].rect.alpha = 1
       end
-    if level.map.door.open then
+    if level.map.door and level.map.door.open then
       level.map.door.open =false
       level.map.door:setSequence("open")
       end

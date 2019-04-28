@@ -26,6 +26,13 @@ require("enemies")
  local enemies = {}
  local stoneTable = {}
 
+ local player_options = {
+   width =32,
+   height = 64,
+   vx=0,
+   vy=0,
+   key_flag = false
+ }
 --построение карты
 
  local level = {
@@ -36,7 +43,7 @@ require("enemies")
 }
 
 level.mapdata = mapread (level)
-level.map,level.border = mapbild (level)
+level.map,level.border,player_options.start_x,player_options.start_y = mapbild (level)
 
 --спаун мобов
 local enemies = spawnthemall(level) --массив врагов
@@ -63,15 +70,7 @@ end
 
 --пресонаж
 
-local player_options = {
-  start_x= 100,
-  start_y = display.contentCenterY*1.3,
-  width =32,
-  height = 64,
-  vx=0,
-  vy=0,
-  key_flag = false
-}
+
 
 local player = display.newRect(player_options.start_x,player_options.start_y,player_options.width,player_options.height)
 player.alpha = 0
@@ -322,7 +321,7 @@ local up_flag = false
 
   Runtime:addEventListener("key", keyboardcontrol)
 
-  local function onGlobalCollision( event )
+local function onGlobalCollision( event )
       --   print( event.object1.id )       --the first object in the collision
         -- print( event.object2.id )
     if event.object1.id== "enemy" and event.object2.id=="player" then
