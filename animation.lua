@@ -181,7 +181,7 @@ sequences_door= {
     start = 1,
     count = 5,
     time = 800,
-    loopCount = 0,
+    loopCount = 1,
     loopDirection = "forward"
 }
 }
@@ -197,4 +197,8 @@ function makeBackground(backgroundImage,level)
     camera:add(background[i], 2)
 
   end
+end
+function makeMoreAlpha (obj)
+  obj.alpha = obj.alpha - 0.1
+
 end

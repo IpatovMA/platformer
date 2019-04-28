@@ -21,8 +21,6 @@ require("enemies")
 
 local uiGroop = display.newGroup()
 
-
-
 --массив с врагами
 
  local enemies = {}
@@ -66,7 +64,6 @@ end
 --пресонаж
 
 local player_options = {
-  -- id="player",
   start_x= 100,
   start_y = display.contentCenterY*1.3,
   width =32,
@@ -82,6 +79,47 @@ camera:add(player, 1)
 physics.addBody(player,"dynamic",{density=3.0,bounce = 0,friction = 1.0})
 player.isFixedRotation = true
 player.id="player"
+
+--  --спрайт персонажа
+player.sprite = display.newSprite( knight_sprite_sheet, sequences_knight )
+  local spriteScale =player_options.height/(50)
+  local knight_yfix=-3
+  player.sprite.yScale = spriteScale
+  player.sprite.xScale = spriteScale
+  camera:add(player.sprite, 1)
+
+
+local function spriteOritentation(sprite)
+
+      if onGround(player) then
+  if player.vx==0  then
+    if sprite.sequence ~= "idle" then
+    sprite:setSequence("idle")
+    sprite:play()
+      end
+  elseif sprite.sequence ~= "run" then
+    sprite:setSequence("run")
+    sprite:play()
+      end
+    else
+      if sprite.sequence ~= "jump" then
+      sprite:setSequence("jump")
+      sprite:play()
+    end
+    end
+
+    if player.vx > 0  then
+          sprite.xScale =spriteScale
+        end
+    if player.vx < 0  then
+          sprite.xScale = -spriteScale
+      end
+
+  --привязка спрайта персонажа
+  sprite.x=player.x
+  sprite.y=player.y+knight_yfix
+end
+      player.sprite:play()
 
 --золото счетчик
 local gold = {count = 0}
@@ -106,46 +144,6 @@ function keyShow (flag)
   end
 end
 
---  --спрайт
-local player_sprite = display.newSprite( knight_sprite_sheet, sequences_knight )
-  local spriteScale =player_options.height/(50)
-  local knight_yfix=-3
-  player_sprite.yScale = spriteScale
-  player_sprite.xScale = spriteScale
-  camera:add(player_sprite, 1)
-
-
-local function spriteOritentation(player_sprite)
-
-      if onGround(player) then
-  if player.vx==0  then
-    if player_sprite.sequence ~= "idle" then
-    player_sprite:setSequence("idle")
-    player_sprite:play()
-      end
-  elseif player_sprite.sequence ~= "run" then
-    player_sprite:setSequence("run")
-    player_sprite:play()
-      end
-    else
-      if player_sprite.sequence ~= "jump" then
-      player_sprite:setSequence("jump")
-      player_sprite:play()
-    end
-    end
-
-    if player.vx > 0  then
-          player_sprite.xScale =spriteScale
-        end
-    if player.vx < 0  then
-          player_sprite.xScale = -spriteScale
-      end
-
-  --привязка спрайта персонажа
-  player_sprite.x=player.x
-  player_sprite.y=player.y+knight_yfix
-end
-      player_sprite:play()
 
 --камера
 camera:setFocus(player)
@@ -213,6 +211,42 @@ function player_death ()
   destroyAllStones(stoneTable)
 end
 
+
+
+--действие -открытие двери-
+local function action (player)
+  print(not(level.map.door.open))
+  local screentext = display.newText("locked", display.contentCenterX, display.contentCenterY, native.systemFont, 150 )
+  screentext:setFillColor(0.32, 0.01, 0.01)
+  screentext.alpha = 0
+  local textdisappear = function()
+    makeMoreAlpha(screentext)
+  end
+  local playerdisappear = function()
+    makeMoreAlpha(player.sprite)
+  end
+  if inarea(player,level.map.door)then
+    if not(level.map.door.open) and player.key_flag  then
+      -- if player.key_flag  then
+      print("open")
+        level.map.door:play()
+        level.map.door.open = true
+      elseif not(level.map.door.open) then
+        print("close")
+          screentext.alpha = 1
+        timer.performWithDelay( 100, textdisappear,10)
+    else
+      print("complete")
+      screentext.text = "complete"
+        screentext:setFillColor(0.63, 0.94, 0.77)
+      screentext.alpha = 1
+      timer.performWithDelay( 50, playerdisappear,10)
+      timer.pause(gameLoopTimer)
+    end
+
+  end
+end
+-- timer.performWithDelay( 1, makeMoreAlpha(level.map.door),0)
 --управение
 local up_flag = false
 local down_flag = false
@@ -287,6 +321,9 @@ local function keyboardcontrol(event)
    down_flag=true
  else down_flag=false
  end
+ if (event.keyName == 'f' and event.phase == 'down') then
+   action(player)
+ end
 end
 
 Runtime:addEventListener("key", keyboardcontrol)
@@ -338,12 +375,9 @@ for i =1, 6 do
 end
 
 local function touchUi(event)
-  print(left_flag,up_flag,right_flag)
-  -- print(event.x,event.y)
+
   for i=1,6 do
-    -- if event.x>left_x(Ui[i]) and event.x<right_x(Ui[i]) and event.y>top_y(Ui[i]) and event.y<bott_y(Ui[i]) then
     if inarea(event,Ui[i]) then
-      -- print(i)
       if i <=3 and (event.phase == "began" or event.phase == "moved")then
         up_flag = true
       else
@@ -360,8 +394,7 @@ local function touchUi(event)
           right_flag = false
         end
       if i == 5 then
-        --пока пусто
-        else  --и тут
+           action(player)
       end
     Ui[i]:setFillColor(0.93, 0.56, 0.56, 0.5)
   else
@@ -376,7 +409,7 @@ end
 Runtime:addEventListener( "touch", touchUi )
 --проверка в реальном времени.
 local function gameLoop ()
-
+  -- print(map.door.id)
   --таймер
   timer_show()
   --отображение индикатора ключа
@@ -390,7 +423,7 @@ local function gameLoop ()
   --скорость персонажа
   player.vx,player.vy = player:getLinearVelocity()
   --управление спрайтом персонажа
-  spriteOritentation(player_sprite)
+  spriteOritentation(player.sprite)
   --управление спрайтами и передвижением врагов и камнями
   for i=1,#enemies do
       enemySpriteOrientation (enemies[i])
@@ -410,8 +443,8 @@ local function gameLoop ()
 
 walkplayer()
 
-  --упал в пустоту?
-  if bott_y(player)>=(level.height-0.2)*level.block_size then
+--упал в пустоту?
+if bott_y(player)>=(level.height-0.2)*level.block_size then
     player_death()
   end
 
