@@ -4,6 +4,7 @@
 --
 -----------------------------------------------------------------------------------------
 perspective = require("perspective")
+ Trajectory = require( "dmc_library.dmc_trajectory" )
 camera = perspective.createView()
 display.setStatusBar( display.HiddenStatusBar )
 system.activate( "multitouch" )
@@ -434,7 +435,8 @@ local function gameLoop ()
         if math.abs(player.x-enemies[i].rect.x)<display.actualContentWidth then
           enemyTimebeforeThrow (enemies[i])
           if enemies[i].throw_flag then
-          enemyThrow(enemies[i],player,stoneTable)
+            -- кидает камень и ориентирует спрайт
+        enemyThrow(enemies[i],player,stoneTable)
 
         end
       end

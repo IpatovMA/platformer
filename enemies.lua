@@ -1,9 +1,10 @@
 local math = require("math")
+
 --статы мобов
 local enemies_start_pos={
-{x=8,y=12 ,type=1,A=5,B=12}
+-- {x=8,y=12 ,type=1,A=5,B=12}
 -- ,{x=35,y=13,type=1,A=31,B=42}
-,{x=25,y=12,type=2,t1=6,t2=10}
+{x=10,y=12,type=2,t1=1,t2=3}
 -- ,{x=23,y=15,type=1,A=20,B=28}
 }
 
@@ -174,15 +175,33 @@ function enemyThrow (enemy,player,stoneTable)
 
   local stone = stoneCreate(enemy.rect.x,top_y(enemy.rect))
   table.insert(stoneTable,stone)
-  --хотел сделать все как на уроках физики, но пришлось подкурчивать коэфициенты
-  local t = 2
-  local vxfix =1.3
-  local vyfix = 1.9
-  local vx = (player.x-enemy.rect.x)/t*vxfix
-  local vy = ((player.y-top_y(enemy.rect)*vyfix)/t+grav*t*t/2)
- stone:setLinearVelocity(vx,vy)
+  --хотел сделать все как на уроках физики, но ничего не вышло, потому что необходимая скорость
+  --странным образом зависит от высоты, на которой находится  моб (не от разницы высот их с персонажем)
+  -- local t = 2
+  -- local vxfix =1.3
+  -- local vyfix = 1.9
+  -- local vx = (player.x-enemy.rect.x)/t*vxfix
+  -- local vy = ((player.y-top_y(enemy.rect)*vyfix)/t+grav*t*t/2)
+ -- stone:setLinearVelocity(vx,vy)
+ -- -- поэтому библиотека
+ local h = math.random(50,200)
+ local traectory_options = {
+        height=h,
+   time=math.abs(enemy.rect.x - player.x)*3+h*2.5,
+   pBegin={enemy.rect.x,top_y(enemy.rect)},
+    pEnd={player.x,player.y},
+    rotate=false
+      -- onComplete=cleanup
+ }
+ Trajectory.move(stone, traectory_options)
   enemy.throw_flag=false
 
+  --ориентация спрайта
+  if enemy.rect.x - player.x >= 0 then
+          enemy.rect.sprite.xScale = enemy.scaling
+    else
+          enemy.rect.sprite.xScale = -enemy.scaling
+  end
 end
 
 function enemyTimebeforeThrow (enemy)
