@@ -52,6 +52,15 @@ sequences_knight = {
       loopCount = 0,
       loopDirection = "bounce"
     },
+     {
+          name = "death",
+          start = 11,
+          count = 10,
+
+          time = 1500,
+          loopCount = 1,
+          loopDirection = "forward"
+        },
     {
          name = "jump",
          start = 30,

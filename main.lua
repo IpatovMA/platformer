@@ -74,7 +74,7 @@ end
 
 
 local player = display.newRect(player_options.start_x,player_options.start_y,player_options.width,player_options.height)
-player.alpha = 0
+player.alpha =0
 camera:add(player, 1)
 physics.addBody(player,"dynamic",{density=3.0,bounce = 0,friction = 1.0})
 player.isFixedRotation = true
@@ -82,8 +82,9 @@ player.id="player"
 
 --  --спрайт персонажа
 player.sprite = display.newSprite( knight_sprite_sheet, sequences_knight )
-  local spriteScale =player_options.height/(50)
-  local knight_yfix=-3
+  local spriteScale =player_options.height/(level.block_size)
+  player.sprite.anchorX=0.3
+  player.sprite.anchorY=0.55
   player.sprite.yScale = spriteScale
   player.sprite.xScale = spriteScale
   camera:add(player.sprite, 1)
@@ -117,7 +118,7 @@ local function spriteOritentation(sprite)
 
   --привязка спрайта персонажа
   sprite.x=player.x
-  sprite.y=player.y+knight_yfix
+  sprite.y=player.y
 end
       player.sprite:play()
 
@@ -197,12 +198,15 @@ end
     local  relaunchButton = display.newText("relaunch", display.contentCenterX, display.contentCenterY+150, native.systemFont, 80)
     relaunchButton.alpha = 0
     local relaunch_flag = false
+    local relaunchTrue = function()
+      relaunch_flag = true
+      relaunchButton.alpha = 1
+    end
      local stext= "locked"
     local screentext = display.newText(stext, display.contentCenterX, display.contentCenterY, native.systemFont, 150 )
         screentext.alpha = 0
-  local function action (player)
 
-
+  local function action ()
     local textdisappear = function()
       makeMoreAlpha(screentext)
     end
@@ -212,25 +216,22 @@ end
     local playerdisappear = function()
       makeMoreAlpha(player.sprite)
     end
-    local relaunchTrue = function()
-      relaunch_flag = true
-      relaunchButton.alpha = 1
-    end
+
     if inarea(player,level.map.door)then
 
       if not(level.map.door.open) and player.key_flag  then
           level.map.door:play()
           level.map.door.open = true
         elseif not(level.map.door.open) then
-          text = "locked"
+          stext = "locked"
               screentext:setFillColor(0.32, 0.01, 0.01)
-          screentext.text = text
+          screentext.text = stext
             screentext.alpha = 1
           timer.performWithDelay( 100, textdisappear,10)
-          timer.performWithDelay( 1000, textremove,1)
+          -- timer.performWithDelay( 1000, textremove,1)
       else
-        text = "complete"
-        screentext.text = text
+        stext = "complete"
+        screentext.text = stext
           screentext:setFillColor(0.63, 0.94, 0.77)
         screentext.alpha = 1
         timer.performWithDelay( 50, playerdisappear,10)
@@ -240,6 +241,21 @@ end
       end
     end
   end
+
+local function player_death ()
+  timer.pause(gameLoopTimer)
+    stext= "You dead"
+    screentext:setFillColor(0.32, 0.01, 0.01)
+    screentext.text = stext
+    screentext.alpha = 1
+
+    player.sprite:setSequence("death")
+      player.sprite.anchorX=0.7
+    player.sprite:play()
+    player:setLinearVelocity(0)
+
+    relaunchTrue()
+end
 
 --управение
 local up_flag = false
@@ -316,7 +332,7 @@ local up_flag = false
    else down_flag=false
    end
    if (event.keyName == 'f' and event.phase == 'down') then
-     action(player)
+     action()
    end
   end
 
@@ -327,7 +343,7 @@ local function onGlobalCollision( event )
         -- print( event.object2.id )
     if event.object1.id== "enemy" and event.object2.id=="player" then
       if bott_y(event.object2)-10>top_y(event.object1) then
-      timer.performWithDelay( 1, relaunch_level ,1 )
+      timer.performWithDelay( 1, player_death ,1 )
       else
         -- timer.performWithDelay( 1, enemyKill(event.other) ,1 )
        event.object1.sprite:setFillColor(1,0,0,0.3)
@@ -337,16 +353,16 @@ local function onGlobalCollision( event )
     --прыжок на монстра
     if event.object2.id== "enemy" and event.object1.id=="player" then
       if bott_y(event.object1)-10>top_y(event.object2) then
-      timer.performWithDelay( 1, relaunch_level ,1 )
+      timer.performWithDelay( 1, player_death ,1 )
       else
-        -- timer.performWithDelay( 1, enemyKill(event.other) ,1 )
+        -- timer.performWithDelay( 1, enemyKill(event.object2) ,1 )
        event.object2.sprite:setFillColor(1,0,0,0.3)
        event.object2.id= "none"
         end
     end
     --камень попадает в игрока
     if event.object2.id== "stone" and event.object1.id=="player" then
-      timer.performWithDelay( 1, relaunch_level ,1 )
+      timer.performWithDelay( 1, player_death ,1 )
       timer.performWithDelay( 1, stoneDestroy(event.object2) ,1 )
     end
     -- камень падает на землю
@@ -356,10 +372,10 @@ local function onGlobalCollision( event )
   end
   Runtime:addEventListener( "collision", onGlobalCollision )
 
-  --управление на экране
-  local Ui = {}
+--управление на экране
+local Ui = {}
 
-  local button_size = 180
+local button_size = 180
   for i =1, 6 do
     Ui[i]= display.newImageRect(buttons_sheet, i , button_size, button_size)
     Ui[i].x=display.contentCenterX+Ui[i].width*((i-1)%3 - 1)
@@ -388,7 +404,7 @@ local function onGlobalCollision( event )
             right_flag = false
           end
         if i == 5 then
-             action(player)
+             action()
         end
       Ui[i]:setFillColor(0.93, 0.56, 0.56, 0.5)
       else
@@ -410,14 +426,13 @@ Runtime:addEventListener( "touch", touchUi )
 
 --проверка в реальном времени.
 local function gameLoop ()
-  -- print(map.door.id)
   --таймер
   timer_show()
   --отображение индикатора ключа
   keyShow(player.key_flag)
   --упал в лаву?
   if inLava(player) then
-    relaunch_level()
+    player_death()
   end
   --взял монету или ключ?
   catchItem(player)
@@ -451,19 +466,19 @@ local function gameLoop ()
 
   --упал в пустоту?
   if bott_y(player)>=(level.height-0.2)*level.block_size then
-      relaunch_level()
+      player_death()
     end
 
 end
 
   gameLoopTimer = timer.performWithDelay( 1, gameLoop, 0 )
 
---смерть персонажа, перезагрузка уровня
+-- перезагрузка уровня
 function relaunch_level ()
   player.x = player_options.start_x
   player.y = player_options.start_y
-  player:setLinearVelocity(0)
   player.sprite.alpha = 1
+  player.sprite.anchorX=0.3
   sec=0
   gold.count=0
   gold.show.text=gold.count
