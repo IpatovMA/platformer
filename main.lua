@@ -163,7 +163,7 @@ end
 
 local function inLava (obj)
   local i=math.ceil((bott_y(obj)+1)/level.block_size)
-  for j=(math.floor((left_x(obj))/level.block_size)),(math.floor((right_x(obj))/level.block_size)) do
+  for j=(math.ceil((left_x(obj))/level.block_size)),(math.floor((right_x(obj))/level.block_size)) do
    if level.map[i][j].id=="lava" then
      return true
    end
@@ -266,27 +266,19 @@ local up_flag = false
 
 
   local function walkplayer ()
-      -- print(up_flag,right_flag,onGround(player),player.vy )
-    -- if not(onGround(player)) then
-   --      player:applyLinearImpulse(0,0.9,player.x,player.y)
-   --  end
 
-   --  if player.vy and player.vy ~=0 then
-   --
-   -- end
+
+   local vy = player.vy
+
    if (right_flag) then
      if not(onGround(player)) then
-       local vy = player.vy
-
        player:setLinearVelocity(walkspeed/1.3, vy-0.0001*grav)
      else player:setLinearVelocity(walkspeed, player.vy )
      end
    end
    if (left_flag) then
      if not(onGround(player)) then
-       local vy = player.vy
-
-       player:setLinearVelocity(-walkspeed/1.3,vy-0.0001*grav )
+           player:setLinearVelocity(-walkspeed/1.3,vy-0.0001*grav )
      else player:setLinearVelocity(-walkspeed, player.vy )end
    end
    if up_flag and (onGround(player)) then
@@ -298,18 +290,18 @@ local up_flag = false
 
 
     -- --убираем скольжение
-    --  if not(left_flag) and player.vx and player.vx<0 and (onGround(player)) then
-    --    player:setLinearVelocity(0,player.vy)
-    --    print("(l)")
-    --  end
-    --  if not(right_flag) and player.vx and player.vx>0 and (onGround(player)) then
-    --    player:setLinearVelocity(0,player.vy)
-    --    print("(r)")
-    --  end
-    --  print((right_flag))
-    --  if not(right_flag) and not(left_flag) and not(up_flag) then
-    --     player:setLinearVelocity(0)
-    --  end
+     if not(left_flag) and player.vx<0 and (onGround(player)) then
+       player:setLinearVelocity(0,vy-0.0001*grav )
+       print("(l)")
+     end
+     if not(right_flag) and player.vx>0 and (onGround(player)) then
+       player:setLinearVelocity(0,vy-0.0001*grav )
+       print("(r)")
+     end
+     print((right_flag))
+     if not(right_flag) and not(left_flag) and not(up_flag)  then
+        player:setLinearVelocity(0,vy-0.0001*grav )
+     end
   end
   --управеление с клавиатруы
   local function keyboardcontrol(event)

@@ -82,7 +82,7 @@ function mapbild (level)
         map[i][j].rect.x=j*level.block_size+x
         map[i][j].rect.y=i*level.block_size+y
         -- map[i][j].rect.id = "block"
-        physics.addBody(map[i][j].rect,"static",{bounce = 0,friction = 1.0})
+        physics.addBody(map[i][j].rect,"static",{bounce = 0,friction = 0.0})
       end
       --голда
       if level.mapdata[i][j] == "G" then
@@ -192,13 +192,13 @@ function rebuildmap (level)
     return level.map
     end
     -- --сетка
-    -- for i=0,25 do
-    --   local x = display.newRect(i*50,display.contentCenterY,5,display.actualContentHeight)
-    --   camera:add(x,1)
-    --   x:setFillColor(0,0,1)
-    -- end
-    -- for i=0,display.actualContentHeight/50 do
-    --   local x = display.newRect(display.contentCenterX,i*50,5000,5)
-    --     camera:add(x,1)
-    --     x:setFillColor(0,0,1)
-    -- end
+    for i=0,25 do
+      local x = display.newRect(i*50,display.contentCenterY,5,display.actualContentHeight)
+      camera:add(x,1)
+      x:setFillColor(0,0,1)
+    end
+    for i=0,display.actualContentHeight/50 do
+      local x = display.newRect(display.contentCenterX,i*50,5000,5)
+        camera:add(x,1)
+        x:setFillColor(0,0,1)
+    end
