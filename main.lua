@@ -163,7 +163,7 @@ end
 
 local function inLava (obj)
   local i=math.ceil((bott_y(obj)+1)/level.block_size)
-  for j=(math.ceil((left_x(obj))/level.block_size)),(math.ceil((right_x(obj))/level.block_size)) do
+  for j=(math.floor((left_x(obj))/level.block_size)),(math.floor((right_x(obj))/level.block_size)) do
    if level.map[i][j].id=="lava" then
      return true
    end
@@ -250,7 +250,8 @@ local function player_death ()
       player.sprite.anchorX=0.7
     player.sprite:play()
     player:setLinearVelocity(0)
-
+    physics.addBody(player.sprite,{bounce=0.5})
+    player.sprite.isFixedRotation=true
     relaunchTrue()
 end
 
@@ -428,7 +429,9 @@ local function gameLoop ()
   keyShow(player.key_flag)
   --упал в лаву?
   if inLava(player) then
-    player_death()
+
+      timer.performWithDelay( 1, player_death ,1 )
+    print(player.sprite.sequence)
   end
   --взял монету или ключ?
   catchItem(player)
@@ -475,6 +478,7 @@ end
 function relaunch_level ()
   player.x = player_options.start_x
   player.y = player_options.start_y
+  physics.removeBody(player.sprite)
   player.sprite.alpha = 1
   player.sprite.anchorX=0.3
   sec=0
