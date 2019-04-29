@@ -101,15 +101,17 @@ function mapbild (level)
       --лава
       if level.mapdata[i][j] == "L" then
         map[i][j] = {
-
           rect  = display.newSprite( lava_sprite_sheet, sequences_lava),
           id = "lava"
         }
+        physics.addBody(map[i][j].rect,"static",{bounce = 0,friction = 0.0})
         map[i][j].rect:setSequence("bul'k")
         map[i][j].rect.yScale = lavaScaling
         map[i][j].rect.xScale = lavaScaling
         map[i][j].rect.x=j*level.block_size+x
         map[i][j].rect.y=i*level.block_size+y
+        map[i][j].rect.height = level.block_size/2
+        map[i][j].rect.id = "lava"
         map[i][j].rect:play()
       end
       --дверь
@@ -191,14 +193,14 @@ function rebuildmap (level)
 
     return level.map
     end
-    -- --сетка
-    for i=0,25 do
-      local x = display.newRect(i*50,display.contentCenterY,5,display.actualContentHeight)
-      camera:add(x,1)
-      x:setFillColor(0,0,1)
-    end
-    for i=0,display.actualContentHeight/50 do
-      local x = display.newRect(display.contentCenterX,i*50,5000,5)
-        camera:add(x,1)
-        x:setFillColor(0,0,1)
-    end
+    -- -- --сетка
+    -- for i=0,25 do
+    --   local x = display.newRect(i*50,display.contentCenterY,5,display.actualContentHeight)
+    --   camera:add(x,1)
+    --   x:setFillColor(0,0,1)
+    -- end
+    -- for i=0,display.actualContentHeight/50 do
+    --   local x = display.newRect(display.contentCenterX,i*50,5000,5)
+    --     camera:add(x,1)
+    --     x:setFillColor(0,0,1)
+    -- end

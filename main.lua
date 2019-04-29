@@ -14,8 +14,8 @@ math.randomseed(os.time())
 
 local physics = require("physics")
 physics.start()
-physics.setGravity(0,9.8)
-grav =9.8
+physics.setGravity(0,15)
+grav =12
 require("mapbuild")
 require("animation")
 require("enemies")
@@ -61,12 +61,12 @@ makeBackground(backgroundImage,level)
 
 --таймер
 sec = 0
-level.time = display.newText(sec/100, display.contentCenterX, 20, native.systemFont, 40 )
- level.time:setFillColor(math.random(),math.random(),math.random())
- level.time.align = "center"
+-- level.time = display.newText(sec/100, display.contentCenterX, 20, native.systemFont, 40 )
+--  level.time:setFillColor(math.random(),math.random(),math.random())
+--  level.time.align = "center"
 local timer_show = function()
   sec = sec + 1
-   level.time.text = sec/100
+   -- level.time.text = sec/100
 end
 
 --пресонаж
@@ -162,13 +162,14 @@ function onGround (obj)
 end
 
 local function inLava (obj)
-  local i=math.ceil((bott_y(obj)+1)/level.block_size)
-  for j=(math.ceil((left_x(obj))/level.block_size)),(math.floor((right_x(obj))/level.block_size)) do
-   if level.map[i][j].id=="lava" then
-     return true
-   end
-  end
-  return false
+  -- for i = math.ceil((top_y(obj)-1)/level.block_size),math.ceil((bott_y(obj)+1)/level.block_size) do
+  -- for j=(math.ceil((left_x(obj))/level.block_size)),(math.ceil((right_x(obj)-25)/level.block_size)) do
+  --  if level.map[i][j].id=="lava" then
+  --    return true
+  --  end
+  -- end
+  -- end
+  -- return false
 end
 
 local function catchItem (obj)
@@ -225,7 +226,6 @@ end
           screentext.text = stext
             screentext.alpha = 1
           timer.performWithDelay( 100, textdisappear,10)
-          -- timer.performWithDelay( 1000, textremove,1)
       else
         stext = "COMPLETE"
         screentext.text = stext
@@ -234,7 +234,7 @@ end
         timer.performWithDelay( 50, playerdisappear,10)
           timer.performWithDelay( 500, relaunchTrue,1)
         timer.pause(gameLoopTimer)
-        --реалунчь тру ушел в плеер дисапиар
+
       end
     end
   end
@@ -247,11 +247,12 @@ local function player_death ()
     screentext.alpha = 1
 
     player.sprite:setSequence("death")
-      player.sprite.anchorX=0.7
+    player.sprite.anchorX=0.7
     player.sprite:play()
     player:setLinearVelocity(0)
     physics.addBody(player.sprite,{bounce=0.5})
     player.sprite.isFixedRotation=true
+    player.id = "dead"
     relaunchTrue()
 end
 
@@ -261,47 +262,49 @@ local up_flag = false
   local left_flag = false
   local right_flag = false
 
-  local walkspeed = 200
-  local jampspeed = 250
+  local walkspeed = 270
+  local jampspeed = 320
+  local inAirWalk = 1.5
 
 
-  local function walkplayer ()
+local function walkplayer ()
 
 
    local vy = player.vy
 
    if (right_flag) then
      if not(onGround(player)) then
-       player:setLinearVelocity(walkspeed/1.3, vy-0.0001*grav)
+       player:setLinearVelocity(walkspeed/inAirWalk, vy-0.0001*grav)
      else player:setLinearVelocity(walkspeed, player.vy )
      end
    end
    if (left_flag) then
      if not(onGround(player)) then
-           player:setLinearVelocity(-walkspeed/1.3,vy-0.0001*grav )
+           player:setLinearVelocity(-walkspeed/inAirWalk,vy-0.0001*grav )
      else player:setLinearVelocity(-walkspeed, player.vy )end
    end
    if up_flag and (onGround(player)) then
-    player:setLinearVelocity(player.vx/1.3, -jampspeed )
+    player:setLinearVelocity(player.vx/inAirWalk, -jampspeed )
    end
-   if (down_flag) then
-     relaunch_level ()
-   end
+   -- if (down_flag) then
+   --   relaunch_level ()
+   -- end
 
 
     -- --убираем скольжение
      if not(left_flag) and player.vx<0 and (onGround(player)) then
        player:setLinearVelocity(0,vy-0.0001*grav )
-       print("(l)")
      end
      if not(right_flag) and player.vx>0 and (onGround(player)) then
        player:setLinearVelocity(0,vy-0.0001*grav )
-       print("(r)")
      end
-     print((right_flag))
      if not(right_flag) and not(left_flag) and not(up_flag)  then
         player:setLinearVelocity(0,vy-0.0001*grav )
      end
+     -- -- своя графитация
+     -- if not(onGround(player)) then
+     --    player:setLinearVelocity(player.vx,vy-0.0001*grav )
+     -- end
   end
   --управеление с клавиатруы
   local function keyboardcontrol(event)
@@ -329,7 +332,7 @@ local up_flag = false
   Runtime:addEventListener("key", keyboardcontrol)
 
 local function onGlobalCollision( event )
-
+    -- print(event.object1.id, event.object2.id)
     if event.object1.id== "enemy" and event.object2.id=="player" then
       if bott_y(event.object2)-10>top_y(event.object1) then
       timer.performWithDelay( 1, player_death ,1 )
@@ -338,8 +341,8 @@ local function onGlobalCollision( event )
        -- event.object1.sprite:setFillColor(1,0,0,0.3)
        -- event.object1.id= "none"
         end
-    end
--- --    прыжок на монстра
+      end
+      --    прыжок на монстра
     if event.object2.id== "enemy" and event.object1.id=="player" then
       if bott_y(event.object1)-10>top_y(event.object2) then
       timer.performWithDelay( 1, player_death ,1 )
@@ -358,6 +361,11 @@ local function onGlobalCollision( event )
     if event.object1.id~= "player" and event.object1.id~= "enemy"  and event.object2.id=="stone" then
       timer.performWithDelay( 1, stoneDestroy(event.object2) ,1 )
     end
+    if event.object2.id== "player" and event.object1.id=="lava" then
+      timer.performWithDelay( 1, player_death ,1 )
+
+    end
+
   end
   Runtime:addEventListener( "collision", onGlobalCollision )
 
@@ -419,12 +427,7 @@ local function gameLoop ()
   timer_show()
   --отображение индикатора ключа
   keyShow(player.key_flag)
-  --упал в лаву?
-  if inLava(player) then
 
-      timer.performWithDelay( 1, player_death ,1 )
-    print(player.sprite.sequence)
-  end
   --взял монету или ключ?
   catchItem(player)
   --скорость персонажа
@@ -471,6 +474,7 @@ function relaunch_level ()
   player.x = player_options.start_x
   player.y = player_options.start_y
   physics.removeBody(player.sprite)
+  player.id = "player"
   player.sprite.alpha = 1
   player.sprite.anchorX=0.3
   sec=0
