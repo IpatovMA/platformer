@@ -2,10 +2,11 @@ local math = require("math")
 
 --статы мобов
 local enemies_start_pos={
-{x=8,y=12 ,type=1,A=5,B=5}
--- ,{x=35,y=13,type=1,A=31,B=42}
-,{x=10,y=12,type=2,t1=6,t2=8}
--- ,{x=23,y=15,type=1,A=20,B=28}
+{x=22,y=8 ,type=1,A=22,B=26}
+ ,{x=34,y=14,type=1,A=34,B=49}
+  ,{x=18,y=15,type=1,A=17,B=21}
+,{x=30,y=15,type=2,t1=4,t2=8}
+ ,{x=37,y=4,type=2,t1=6,t2=10}
 }
 
 enemy_options={
@@ -55,7 +56,7 @@ function enemySpawn (start_pos,level)
   enemy.rect.sprite.y=(start_pos.y-0.5)*level.block_size+enemy.y_fix
   enemy.rect.sprite:play()
   enemy.rect.alpha=0
-  physics.addBody(enemy.rect,"dynamic",{density=3.0,bounce = 1,friction =0.0})
+  physics.addBody(enemy.rect,"dynamic",{density=3.0,bounce = 0.3,friction =0.0})
   enemy.rect.isFixedRotation = true
   enemy.rect.id = "enemy"
   enemy.rect.num = 1
@@ -88,9 +89,9 @@ end
 --диспавнить одного
 function enemyKill (obj,enemies)
   for i , enemy in ipairs(enemies) do
-print(enemy.rect, obj)
+-- print(enemy.rect, obj)
       if enemy.rect == obj   then
-        physics.removeBody(obj)
+        -- physics.removeBody(obj)
         display.remove(obj)
         display.remove(obj.sprite)
         table.remove(enemies,i)
@@ -107,8 +108,6 @@ end
 
 --передвижение мобов
 function enemySpriteOrientation (enemy)
-  -- if enemy.rect then
-  --   print(enemy.rect.id)
   enemy.vx,enemy.vy=enemy.rect:getLinearVelocity()
 
   if enemy.vx > 0  then
@@ -117,15 +116,9 @@ function enemySpriteOrientation (enemy)
   if enemy.vx < 0  then
         enemy.rect.sprite.xScale = enemy.scaling
     end
-    -- if onGround(enemy.rect) then
           enemy.rect.sprite:play()
-    -- else enemy.sprite:pause() end
-  enemy.rect.sprite.x = enemy.rect.x
-  enemy.rect.sprite.y = enemy.rect.y+enemy.y_fix
-
--- else   table.remove(enemy)
---   print("logging")
--- end
+          enemy.rect.sprite.x = enemy.rect.x
+          enemy.rect.sprite.y = enemy.rect.y+enemy.y_fix
 end
 
 function enemyWalk (enemy)
@@ -179,23 +172,22 @@ function enemyThrow (enemy,player,stoneTable)
 
   local stone = stoneCreate(enemy.rect.x,top_y(enemy.rect))
   table.insert(stoneTable,stone)
-  --хотел сделать все как на уроках физики, но ничего не вышло, потому что необходимая скорость
-  --странным образом зависит от высоты, на которой находится  моб (не от разницы высот их с персонажем)
-  -- local t = 2
-  -- local vxfix =1.3
-  -- local vyfix = 1.9
-  -- local vx = (player.x-enemy.rect.x)/t*vxfix
-  -- local vy = ((player.y-top_y(enemy.rect)*vyfix)/t+grav*t*t/2)
- -- stone:setLinearVelocity(vx,vy)
+--хотел сделать все как на уроках физики, но ничего не вышло, потому что необходимая скорость
+--странным образом зависит от высоты, на которой находится  моб (не от разницы высот их с персонажем)
+          -- local t = 2
+          -- local vxfix =1.3
+          -- local vyfix = 1.9
+          -- local vx = (player.x-enemy.rect.x)/t*vxfix
+          -- local vy = ((player.y-top_y(enemy.rect)*vyfix)/t+grav*t*t/2)
+         -- stone:setLinearVelocity(vx,vy)
  -- -- поэтому библиотека
- local h = math.random(50,200)
+ local h = math.random(50,140)
  local traectory_options = {
         height=h,
    time=math.abs(enemy.rect.x - player.x)*3+h*2.5,
    pBegin={enemy.rect.x,top_y(enemy.rect)},
     pEnd={player.x,player.y},
     rotate=false
-      -- onComplete=cleanup
  }
  Trajectory.move(stone, traectory_options)
   enemy.throw_flag=false

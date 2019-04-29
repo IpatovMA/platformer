@@ -15,7 +15,7 @@ math.randomseed(os.time())
 local physics = require("physics")
 physics.start()
 physics.setGravity(0,15)
-grav =12
+grav =15
 require("mapbuild")
 require("animation")
 require("enemies")
@@ -73,7 +73,7 @@ end
 local player = display.newRect(player_options.start_x,player_options.start_y,player_options.width,player_options.height)
 player.alpha =0
 camera:add(player, 1)
-physics.addBody(player,"dynamic",{density=3.0,bounce = 0,friction = 1.0})
+physics.addBody(player,"dynamic",{density=3.0,bounce = 0,friction = 0.0})
 player.isFixedRotation = true
 player.id="player"
 
@@ -158,19 +158,8 @@ function onGround (obj)
    end
   end
   return false
---  return true
 end
 
-local function inLava (obj)
-  -- for i = math.ceil((top_y(obj)-1)/level.block_size),math.ceil((bott_y(obj)+1)/level.block_size) do
-  -- for j=(math.ceil((left_x(obj))/level.block_size)),(math.ceil((right_x(obj)-25)/level.block_size)) do
-  --  if level.map[i][j].id=="lava" then
-  --    return true
-  --  end
-  -- end
-  -- end
-  -- return false
-end
 
 local function catchItem (obj)
   for i = math.ceil((top_y(obj)-1)/level.block_size),math.ceil((bott_y(obj)+1)/level.block_size) do
@@ -247,10 +236,11 @@ local function player_death ()
     screentext.alpha = 1
 
     player.sprite:setSequence("death")
+      player.sprite.anchorY=0.3
     player.sprite.anchorX=0.7
     player.sprite:play()
     player:setLinearVelocity(0)
-    physics.addBody(player.sprite,{bounce=0.5})
+    physics.addBody(player.sprite,{bounce=0.1,friction=10})
     player.sprite.isFixedRotation=true
     player.id = "dead"
     relaunchTrue()
@@ -262,26 +252,29 @@ local up_flag = false
   local left_flag = false
   local right_flag = false
 
-  local walkspeed = 270
+  local walkspeed = 200
   local jampspeed = 320
-  local inAirWalk = 1.5
+  local inAirWalk = 1
 
 
 local function walkplayer ()
-
-
    local vy = player.vy
 
    if (right_flag) then
      if not(onGround(player)) then
        player:setLinearVelocity(walkspeed/inAirWalk, vy-0.0001*grav)
-     else player:setLinearVelocity(walkspeed, player.vy )
+     else
+       player.x=player.x+1 -- сдвинуть с места, потому что он застревает на стыках блоков, хз как так
+       player:setLinearVelocity(walkspeed, player.vy )
      end
    end
    if (left_flag) then
      if not(onGround(player)) then
            player:setLinearVelocity(-walkspeed/inAirWalk,vy-0.0001*grav )
-     else player:setLinearVelocity(-walkspeed, player.vy )end
+     else
+       player.x=player.x-1-- сдвинуть с места, потому что он застревает на стыках блоков, хз как так
+       player:setLinearVelocity(-walkspeed, player.vy )
+     end
    end
    if up_flag and (onGround(player)) then
     player:setLinearVelocity(player.vx/inAirWalk, -jampspeed )
@@ -381,8 +374,7 @@ local button_size = 180
     Ui[i].id=i
   end
 
-  local function touchUi(event)
-
+local function touchUi(event)
     for i=1,6 do
       if inarea(event,Ui[i]) then
         if i <=3 and (event.phase == "began" or event.phase == "moved")then
@@ -409,6 +401,9 @@ local button_size = 180
       end
       if event.phase == "ended" or event.phase == "canceled" then
             Ui[i]:setFillColor(1,1,1)
+             up_flag = false
+               left_flag = false
+               right_flag = false
       end
     end
 
@@ -476,6 +471,7 @@ function relaunch_level ()
   physics.removeBody(player.sprite)
   player.id = "player"
   player.sprite.alpha = 1
+  player.sprite.anchorY=0.5
   player.sprite.anchorX=0.3
   sec=0
   gold.count=0

@@ -28,10 +28,6 @@ inarea = function(self,area)
   else return false
   end
 end
--- --время между двумя собыитями
--- function timebetween (event1,event2,sec)
---   local sec1 = sec
--- end
 
 --построение карты
 function mapread (level)
@@ -110,7 +106,7 @@ function mapbild (level)
         map[i][j].rect.xScale = lavaScaling
         map[i][j].rect.x=j*level.block_size+x
         map[i][j].rect.y=i*level.block_size+y
-        map[i][j].rect.height = level.block_size/2
+        map[i][j].rect.height = level.block_size/3
         map[i][j].rect.id = "lava"
         map[i][j].rect:play()
       end
