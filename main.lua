@@ -70,9 +70,6 @@ local timer_show = function()
 end
 
 --пресонаж
-
-
-
 local player = display.newRect(player_options.start_x,player_options.start_y,player_options.width,player_options.height)
 player.alpha =0
 camera:add(player, 1)
@@ -203,7 +200,7 @@ end
       relaunchButton.alpha = 1
     end
      local stext= "locked"
-    local screentext = display.newText(stext, display.contentCenterX, display.contentCenterY, native.systemFont, 150 )
+    local screentext = display.newText(stext, display.contentCenterX, display.contentCenterY, native.systemFont, 130 )
         screentext.alpha = 0
 
   local function action ()
@@ -230,7 +227,7 @@ end
           timer.performWithDelay( 100, textdisappear,10)
           -- timer.performWithDelay( 1000, textremove,1)
       else
-        stext = "complete"
+        stext = "COMPLETE"
         screentext.text = stext
           screentext:setFillColor(0.63, 0.94, 0.77)
         screentext.alpha = 1
@@ -244,7 +241,7 @@ end
 
 local function player_death ()
   timer.pause(gameLoopTimer)
-    stext= "You dead"
+    stext= "YOU DIED"
     screentext:setFillColor(0.32, 0.01, 0.01)
     screentext.text = stext
     screentext.alpha = 1
@@ -339,25 +336,24 @@ local up_flag = false
   Runtime:addEventListener("key", keyboardcontrol)
 
 local function onGlobalCollision( event )
-      --   print( event.object1.id )       --the first object in the collision
-        -- print( event.object2.id )
+
     if event.object1.id== "enemy" and event.object2.id=="player" then
       if bott_y(event.object2)-10>top_y(event.object1) then
       timer.performWithDelay( 1, player_death ,1 )
       else
-        -- timer.performWithDelay( 1, enemyKill(event.other) ,1 )
-       event.object1.sprite:setFillColor(1,0,0,0.3)
-       event.object1.id= "none"
+        timer.performWithDelay( 1, enemyKill(event.object1,enemies) ,1 )
+       -- event.object1.sprite:setFillColor(1,0,0,0.3)
+       -- event.object1.id= "none"
         end
     end
-    --прыжок на монстра
+-- --    прыжок на монстра
     if event.object2.id== "enemy" and event.object1.id=="player" then
       if bott_y(event.object1)-10>top_y(event.object2) then
       timer.performWithDelay( 1, player_death ,1 )
       else
-        -- timer.performWithDelay( 1, enemyKill(event.object2) ,1 )
-       event.object2.sprite:setFillColor(1,0,0,0.3)
-       event.object2.id= "none"
+        timer.performWithDelay( 1, enemyKill(event.object2,enemies) ,1 )
+       -- event.object2.sprite:setFillColor(1,0,0,0.3)
+       -- event.object2.id= "none"
         end
     end
     --камень попадает в игрока
@@ -442,6 +438,7 @@ local function gameLoop ()
   spriteOritentation(player.sprite)
   --управление спрайтами и передвижением врагов и камнями
   for i=1,#enemies do
+    if enemies[i].rect.sprite then
       enemySpriteOrientation (enemies[i])
       if enemies[i].type==1 then
         enemyWalk (enemies[i])
@@ -456,6 +453,7 @@ local function gameLoop ()
         end
       end
       end
+    end
   end
 
   if not(relaunch_flag) and relaunchButton.alpha == 1 then

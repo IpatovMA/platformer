@@ -2,9 +2,9 @@ local math = require("math")
 
 --статы мобов
 local enemies_start_pos={
--- {x=8,y=12 ,type=1,A=5,B=12}
+{x=8,y=12 ,type=1,A=5,B=5}
 -- ,{x=35,y=13,type=1,A=31,B=42}
-{x=10,y=12,type=2,t1=1,t2=3}
+,{x=10,y=12,type=2,t1=6,t2=8}
 -- ,{x=23,y=15,type=1,A=20,B=28}
 }
 
@@ -86,18 +86,22 @@ function spawnthemall (level)
 end
 
 --диспавнить одного
-function enemyKill (enemy)
-    display.remove(enemy.sprite)
-  display.remove(enemy)
-
-
-  -- --костыль
-  -- table.remove(enemy)
+function enemyKill (obj,enemies)
+  for i , enemy in ipairs(enemies) do
+print(enemy.rect, obj)
+      if enemy.rect == obj   then
+        physics.removeBody(obj)
+        display.remove(obj)
+        display.remove(obj.sprite)
+        table.remove(enemies,i)
+      end
+  end
 end
 --убить всех мобов
 function killallenemies (enemies)
   for i , enemy in ipairs(enemies) do
-       enemyKill(enemy.rect)
+    display.remove(enemy.rect)
+      display.remove(enemy.rect.sprite)
   end
 end
 
