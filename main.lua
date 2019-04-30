@@ -385,7 +385,7 @@ local button_size = 180
   for i =1, 6 do
     Ui[i]= display.newImageRect(buttons_sheet, i , button_size, button_size)
     Ui[i].x=display.contentCenterX+Ui[i].width*((i-1)%3 - 1)
-    Ui[i].y=display.actualContentHeight+ Ui[i].height*(math.floor((i-1)/3)-1.6)
+    Ui[i].y=display.contentHeight+ Ui[i].height*(math.floor((i-1)/3)-1.2)
     Ui[i].alpha = 0.7
     Ui[i].id=i
   end
