@@ -453,7 +453,7 @@ local function gameLoop ()
         enemyWalk (enemies[i])
       end
       if enemies[i].type==2 then
-        if math.abs(player.x-enemies[i].rect.x)<display.actualContentWidth then
+        if math.abs(player.x-enemies[i].rect.x)<15*level.block_size then
           enemyTimebeforeThrow (enemies[i])
           if enemies[i].throw_flag then
             -- кидает камень и ориентирует спрайт

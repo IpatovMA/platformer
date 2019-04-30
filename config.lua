@@ -9,8 +9,8 @@ application =
 	{
 		width = 768,
 		height = 1364,
-		-- scale = "letterbox",
-		scale = "evenZoom",
+		scale = "letterbox",
+		-- scale = "evenZoom",
 		fps = 60,
 
 		--[[
