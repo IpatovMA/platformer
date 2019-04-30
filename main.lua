@@ -40,7 +40,7 @@ require("enemies")
   fileName = 'map.txt',
   block_size=50,
   width = 50,
-  height = 25,
+  height = 30,
 }
 
 level.mapdata = mapread (level)
@@ -369,7 +369,7 @@ local button_size = 180
   for i =1, 6 do
     Ui[i]= display.newImageRect(buttons_sheet, i , button_size, button_size)
     Ui[i].x=display.contentCenterX+Ui[i].width*((i-1)%3 - 1)
-    Ui[i].y=display.contentCenterY*2.1-Ui[i].height + Ui[i].height*math.floor((i-1)/3)
+    Ui[i].y=display.actualContentHeight+ Ui[i].height*(math.floor((i-1)/3)-1.6)
     Ui[i].alpha = 0.7
     Ui[i].id=i
   end

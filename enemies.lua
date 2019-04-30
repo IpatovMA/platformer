@@ -9,6 +9,7 @@ local enemies_start_pos={
  ,{x=37,y=4,type=2,t1=6,t2=10}
 }
 
+
 enemy_options={
 [1]={
     type=1,
@@ -63,7 +64,7 @@ function enemySpawn (start_pos,level)
   camera:add(enemy.rect,1)
   camera:add(enemy.rect.sprite,1)
   if enemy.type==1 then
-     enemy.A = (start_pos.A+0.5)*level.block_size
+     enemy.A = (start_pos.A-0.5)*level.block_size
      enemy.B = (start_pos.B-0.5)*level.block_size
   end
   if enemy.type==2 then
