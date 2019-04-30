@@ -180,8 +180,17 @@ local function catchItem (obj)
   return false
 end
 
-  --действие -открытие двери-
    -- кнопка перезагразки после прохождения
+local function stopallentity ()
+   player:setLinearVelocity(0)
+   -- player.sprite:setLinearVelocity(0)
+   for i, enemy in pairs(enemies) do
+     enemy.rect:setLinearVelocity(0)
+   end
+
+end
+
+   -- кнопка перезагразки уровня
     local  relaunchButton = display.newText("relaunch", display.contentCenterX, display.contentCenterY+150, native.systemFont, 80)
     relaunchButton.alpha = 0
     local relaunch_flag = false
@@ -192,14 +201,14 @@ end
      local stext= "locked"
     local screentext = display.newText(stext, display.contentCenterX, display.contentCenterY, native.systemFont, 130 )
         screentext.alpha = 0
-
+  --действие -открытие двери-
   local function action ()
     local textdisappear = function()
       makeMoreAlpha(screentext)
     end
-    local textremove = function()
-      display.remove(obj)
-    end
+    -- local textremove = function()
+    --   display.remove(obj)
+    -- end
     local playerdisappear = function()
       makeMoreAlpha(player.sprite)
     end
@@ -220,8 +229,11 @@ end
         screentext.text = stext
           screentext:setFillColor(0.63, 0.94, 0.77)
         screentext.alpha = 1
+        player.id = "complete"
         timer.performWithDelay( 50, playerdisappear,10)
           timer.performWithDelay( 500, relaunchTrue,1)
+          -- timer.performWithDelay( 500, stopallentity,1)
+          stopallentity()
         timer.pause(gameLoopTimer)
 
       end
@@ -240,9 +252,12 @@ local function player_death ()
     player.sprite.anchorX=0.7
     player.sprite:play()
     player:setLinearVelocity(0)
-    physics.addBody(player.sprite,{bounce=0.1,friction=10})
+    physics.addBody(player.sprite,{bounce=0.1})
     player.sprite.isFixedRotation=true
     player.id = "dead"
+    -- timer.performWithDelay( 500, stopallentity,1)
+    stopallentity()
+
     relaunchTrue()
 end
 
@@ -326,6 +341,7 @@ local function walkplayer ()
 
 local function onGlobalCollision( event )
     -- print(event.object1.id, event.object2.id)
+
     if event.object1.id== "enemy" and event.object2.id=="player" then
       if bott_y(event.object2)-10>top_y(event.object1) then
       timer.performWithDelay( 1, player_death ,1 )
